@@ -1,2 +1,23 @@
+<<<<<<< HEAD
 # Git
 .git/
+=======
+/node_modules/*
+/dist/*
+/build/
+.DS_Store
+package-lock.json
+.env
+.env-local
+.idea
+*.suo
+*.sublime-project
+*.sublime-workspace
+
+# Vendors
+node_modules/
+
+# Build
+dist/
+/npm-debug.log
+>>>>>>> v_dev
