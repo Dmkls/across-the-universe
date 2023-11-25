@@ -15,6 +15,8 @@ export class NewGameScene extends Scene {
 
   async create() {
 
+
+
     this._ground = new Ground(this)
 
     this._car = new Car(this, { x: 300, y: 300 })
