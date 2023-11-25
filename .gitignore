@@ -1,8 +1,18 @@
-# Git
-.git/
+/node_modules/*
+/dist/*
+/build/
+.DS_Store
+package-lock.json
+.env
+.env-local
+.idea
+*.suo
+*.sublime-project
+*.sublime-workspace
 
-# NPM
+# Vendors
 node_modules/
 
-# Dist
+# Build
 dist/
+/npm-debug.log
