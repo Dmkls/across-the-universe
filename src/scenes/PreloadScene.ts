@@ -10,11 +10,14 @@ export class PreloadScene extends Phaser.Scene
   preload()
   {
     this.load.image('car', 'assets/images/car.png')
+    this.load.image('wheel', 'assets/images/wheel.png')
+    this.load.image('wheel2', 'assets/images/wheel.png')
+
   }
 
   create()
   {
-    this.add.image(400, 300, 'car')
+    this.scene.start('game')
   }
 
 }

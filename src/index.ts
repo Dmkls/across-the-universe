@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import {PreloadScene} from "./scenes/PreloadScene";
+import {Game} from "./scenes/Game"
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -8,10 +9,17 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: 'matter',
     matter: {
-      gravity: { y: 0 }
+      debug: true,
+      gravity: { y: 0 },
+      setBounds: {
+        left: true,
+        right: true,
+        top:  true,
+        bottom: true
+      }
     }
   },
-  scene: [PreloadScene]
+  scene: [PreloadScene, Game]
 }
 
 new Phaser.Game(config)
