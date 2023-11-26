@@ -1,5 +1,4 @@
 import Phaser from "phaser";
-import {Composite, Composites, Constraint} from "matter";
 
 export class Game extends Phaser.Scene
 {
@@ -14,14 +13,16 @@ export class Game extends Phaser.Scene
         const width = this.scale.width
         const height = this.scale.height
 
+        let shapes = this.cache.json.get('shapes');
 
-        const car = this.matter.add.image(200,200, 'car')
-        // // car.setScale(0.5, 0.5)
-        //
-        const wheel = this.matter.add.image(100, 350, 'wheel')
-        const wheel2 = this.matter.add.image(400, 350, 'wheel2')
 
-        //
+        const car = this.matter.add.sprite(200, 200, 'car', 'car', {shape: shapes.car})
+        const wheel = this.matter.add.sprite(40, 245, 'wheel', 'wheel', {shape: shapes.wheel})
+        const wheel2 = this.matter.add.sprite(360, 245, 'wheel2', 'wheel', {shape: shapes.wheel})
+
+        // car.setVelocity(0, 10)
+
+
         const carBody = car.body as MatterJS.BodyType
         const wheelBody = wheel.body as MatterJS.BodyType
         const wheel2Body = wheel2.body as MatterJS.BodyType
@@ -34,42 +35,33 @@ export class Game extends Phaser.Scene
             length: 50,
             stiffness: 0.2
         }
-        // this.matter.constraint.create(options)
+
         this.matter.add.constraint(
             carBody,
             wheelBody,
-            150,
+            0,
             0.2,
             {
                 pointA: {
-                    x: -150,
+                    x: -163,
                     y: 70
                 }
             })
 
         this.matter.add.constraint(carBody,
             wheel2Body,
-            150,
+            0,
             0.2,
             {
                 pointA: {
-                    x: 150,
+                    x: 160,
                     y: 70
                 }
             })
 
 
-        //
-        // const constraint = MatterJS.Constraint.create(options)
-
-        // car.setVelocity(10, 0)
-        // car.rotation = 60
-
-
-        // this.matter.body.setInertia(body, Infinity)
-
-        // body.inertia = Infinity
-        // car.setFrictionAir(0)
-        // car.setBounce(1)
+        this.matter.body.setInertia(carBody, Infinity)
+        car.setFrictionAir(0)
+        car.setBounce(1)
     }
 }
