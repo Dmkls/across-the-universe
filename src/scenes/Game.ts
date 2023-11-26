@@ -1,7 +1,16 @@
 import Phaser from "phaser";
+import {Collision, Composite, Composites} from "matter";
 
 export class Game extends Phaser.Scene
 {
+
+    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
+    private car!: Phaser.Physics.Matter.Sprite
+
+    init()
+    {
+        this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
+    }
     constructor()
     {
         super('game')
@@ -16,11 +25,13 @@ export class Game extends Phaser.Scene
         let shapes = this.cache.json.get('shapes');
 
 
-        const car = this.matter.add.sprite(200, 200, 'car', 'car', {shape: shapes.car})
-        const wheel = this.matter.add.sprite(40, 245, 'wheel', 'wheel', {shape: shapes.wheel})
-        const wheel2 = this.matter.add.sprite(360, 245, 'wheel2', 'wheel', {shape: shapes.wheel})
+        const car = this.matter.add.sprite(200, 200, 'car', undefined, {shape: shapes.car})
+        const wheel = this.matter.add.sprite(40, 245, 'wheel', undefined, {shape: shapes.wheel})
+        const wheel2 = this.matter.add.sprite(360, 245, 'wheel2', undefined, {shape: shapes.wheel})
+        const ground =  this.matter.add.image(0, 500, 'ground')
 
-        // car.setVelocity(0, 10)
+        this.car = car
+
 
 
         const carBody = car.body as MatterJS.BodyType
@@ -28,18 +39,10 @@ export class Game extends Phaser.Scene
         const wheel2Body = wheel2.body as MatterJS.BodyType
 
 
-        //
-        const options = {
-            bodyA: wheel.body as MatterJS.BodyType,
-            bodyB: wheel2.body as MatterJS.BodyType,
-            length: 50,
-            stiffness: 0.2
-        }
-
         this.matter.add.constraint(
             carBody,
             wheelBody,
-            0,
+            5,
             0.2,
             {
                 pointA: {
@@ -48,9 +51,10 @@ export class Game extends Phaser.Scene
                 }
             })
 
-        this.matter.add.constraint(carBody,
+        this.matter.add.constraint(
+            carBody,
             wheel2Body,
-            0,
+            5,
             0.2,
             {
                 pointA: {
@@ -60,8 +64,21 @@ export class Game extends Phaser.Scene
             })
 
 
-        this.matter.body.setInertia(carBody, Infinity)
-        car.setFrictionAir(0)
+        // this.matter.body.setInertia(carBody, Infinity)
+        // car.setFrictionAir(0)
         car.setBounce(1)
+    }
+
+    update(t: number, dt: number) {
+
+        const car = this.car
+
+        if (this.cursors.left.isDown)
+        {
+            car.setVelocity(-5, 0)
+        } else if (this.cursors.right.isDown)
+        {
+            car.setVelocity(5, 0)
+        }
     }
 }
