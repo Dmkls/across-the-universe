@@ -16,6 +16,7 @@ export class PreloadScene extends Phaser.Scene
 
 
     this.load.json('shapes', 'assets/JSONs/shapes.json')
+    this.load.json('wheelShapes', 'assets/JSONs/wheelShapes.json')
 
 
   }
