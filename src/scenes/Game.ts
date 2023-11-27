@@ -6,6 +6,10 @@ export class Game extends Phaser.Scene {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
     private car!: Phaser.Physics.Matter.Sprite
     private mapHitboxPoints: Phaser.Math.Vector2[] = []
+    private wheel!: Phaser.Physics.Matter.Sprite
+    private wheel2!: Phaser.Physics.Matter.Sprite
+    private wheelAngle: number = 0.1
+
 
     init() {
         this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
@@ -28,8 +32,8 @@ export class Game extends Phaser.Scene {
         // const ground = this.matter.add.image(0, 500, 'ground')
 
         this.car = car
-
-
+        this.wheel = wheel
+        this.wheel2 = wheel2
 
         const carBody = car.body as MatterJS.BodyType
         const wheelBody = wheel.body as MatterJS.BodyType
@@ -40,7 +44,7 @@ export class Game extends Phaser.Scene {
             carBody,
             wheelBody,
             5,
-            0.2,
+            0.4,
             {
                 pointA: {
                     x: -163,
@@ -52,7 +56,7 @@ export class Game extends Phaser.Scene {
             carBody,
             wheel2Body,
             5,
-            0.2,
+            0.4,
             {
                 pointA: {
                     x: 160,
@@ -104,17 +108,19 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setFollowOffset(-175, 0); // Фиксация горизонтального положения, смещение по вертикали
         this.cameras.main.setDeadzone(0, 0); // Зона смягчения, в которой объект может перемещаться без активации камеры
         this.cameras.main.setLerp(1, 1); // Настройка скорости следования камеры (значения от 0 до 1)
-        // this.cameras.main.setBounds(0, 0, mapWidth, this.scale.height); 
+        // this.cameras.main.setBounds(0, 0, mapWidth, this.scale.height);
+//         wheel.setFriction(10)
+
     }
 
     update(t: number, dt: number) {
 
-        const car = this.car
-
         if (this.cursors.left.isDown) {
-            car.setVelocity(-5, 0)
+            this.wheel.setVelocity(-10, 0)
+            this.wheel2.setVelocity(-10, 0)
         } else if (this.cursors.right.isDown) {
-            car.setVelocity(10, 0)
+            this.wheel.setVelocity(10, 0)
+            this.wheel2.setVelocity(-10, 0)
         }
 
         // const carBody = car.body as MatterJS.BodyType
