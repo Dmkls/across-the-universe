@@ -47,7 +47,7 @@ export class Game extends Phaser.Scene
             {
                 pointA: {
                     x: -163,
-                    y: 70
+                    y: 85 // 70
                 }
             })
 
@@ -59,7 +59,7 @@ export class Game extends Phaser.Scene
             {
                 pointA: {
                     x: 160,
-                    y: 70
+                    y: 85 //70
                 }
             })
 
