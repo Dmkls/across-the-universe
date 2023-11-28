@@ -10,7 +10,7 @@ const config: Phaser.Types.Core.GameConfig = {
     default: 'matter',
     matter: {
       debug: true,
-      gravity: { y: 5 },
+      gravity: { y: 3 },
       setBounds: {
         left: true,
         right: false,
