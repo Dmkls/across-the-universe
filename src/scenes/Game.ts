@@ -108,23 +108,31 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setFollowOffset(-175, 0); // Фиксация горизонтального положения, смещение по вертикали
         this.cameras.main.setDeadzone(0, 0); // Зона смягчения, в которой объект может перемещаться без активации камеры
         this.cameras.main.setLerp(1, 1); // Настройка скорости следования камеры (значения от 0 до 1)
-        // this.cameras.main.setBounds(0, 0, mapWidth, this.scale.height);
-//         wheel.setFriction(10)
+
+
+
+        wheel.setCollisionCategory(1)
+        wheel2.setCollisionCategory(1)
+        wheel.setCollisionGroup(1)
+        wheel2.setCollisionGroup(1)
+
+        wheel.setFriction(1)
+        wheel2.setFriction(1)
+
+
+
 
     }
 
     update(t: number, dt: number) {
 
         if (this.cursors.left.isDown) {
-            this.wheel.setVelocity(-10, 0)
+            this.wheel.applyForceFrom({x: this.wheel.width/2, y: this.wheel.height/2} as Phaser.Math.Vector2, {x: -0.01, y: 0} as Phaser.Math.Vector2)
+            this.wheel2.applyForceFrom({x: this.wheel2.width/2, y: this.wheel2.height/2} as Phaser.Math.Vector2, {x: -0.01, y: 0} as Phaser.Math.Vector2)
             this.wheel2.setVelocity(-10, 0)
         } else if (this.cursors.right.isDown) {
-            this.wheel.setVelocity(10, 0)
-            this.wheel2.setVelocity(-10, 0)
+            this.wheel.applyForceFrom({x: this.wheel.width/2, y: this.wheel.height/2} as Phaser.Math.Vector2, {x: 0.01, y: 0} as Phaser.Math.Vector2)
+            this.wheel2.applyForceFrom({x: this.wheel2.width/2, y: this.wheel2.height/2} as Phaser.Math.Vector2, {x: 0.01, y: 0} as Phaser.Math.Vector2)
         }
-
-        // const carBody = car.body as MatterJS.BodyType
-        // const mapWidth = this.mapHitboxPoints[this.mapHitboxPoints.length - 1].x
-        // this.cameras.main.setBounds(carBody.position.x - car.width / 2, 0, mapWidth, this.scale.height);
     }
 }
