@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import Phaser, { NONE } from "phaser";
 import { Collision, Composite, Composites } from "matter";
 
 export class Game extends Phaser.Scene {
@@ -20,6 +20,8 @@ export class Game extends Phaser.Scene {
     private moneyIndicator!: Phaser.GameObjects.Text
     private fuelIndicator!: Phaser.GameObjects.Sprite
 
+    private backWall!: Phaser.GameObjects.Sprite
+
     init() {
         this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
     }
@@ -34,6 +36,12 @@ export class Game extends Phaser.Scene {
 
         let shapes = this.cache.json.get('shapes');
         let wheelShapes = this.cache.json.get('wheelShapes')
+
+        const backWallWidth = 20
+        this.backWall = this.matter.add.sprite(0, 0, 'backWall');
+        this.backWall.setDisplaySize(backWallWidth, this.width)
+        this.matter.body.setStatic(this.backWall.body as MatterJS.BodyType, true);
+        this.matter.body.setInertia(this.backWall.body as MatterJS.BodyType, Infinity);
 
         this.startPosX = 300
         this.startPosY = 200
@@ -131,6 +139,8 @@ export class Game extends Phaser.Scene {
         this.updateDistance()
 
         this.updateIndicatorsPositions()
+
+        this.updateBackWallPosition()
     }
 
     updateDistance() {
@@ -149,4 +159,16 @@ export class Game extends Phaser.Scene {
         this.distanceIndicator.setScrollFactor(0, 0)
     }
 
+    updateBackWallPosition() {
+        const backWallOffset = 400
+        const newX = this.car.x - this.startPosX - backWallOffset
+        const newY = this.car.y
+
+        if (this.backWall.x < newX) {
+            this.backWall.x = newX
+        }
+
+        this.backWall.y = newY
+    }
+    
 }
