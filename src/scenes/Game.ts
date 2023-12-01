@@ -12,7 +12,12 @@ export class Game extends Phaser.Scene {
     private width!: number
     private height!: number
 
+    private maxFuel: number = 1
+    private fuelDecreaseRate: number = this.maxFuel / 30
+
+    private fuel: number = this.maxFuel
     private distance!: number
+
     private startPosX!: number
     private startPosY!: number
 
@@ -123,6 +128,12 @@ export class Game extends Phaser.Scene {
         // индикаторы
         this.distance = 0
         this.distanceIndicator = this.add.text(10, 10, "", { fontFamily: "Arial", fontSize: 28, color: "#ffffff" })
+
+        this.fuel = 1
+        this.fuelIndicator = this.add.sprite(10, 40, "fuelBar")
+        this.fuelIndicator.setOrigin(0, 0)
+
+        
     }
 
     update(t: number, dt: number) {
@@ -141,6 +152,16 @@ export class Game extends Phaser.Scene {
         this.updateIndicatorsPositions()
 
         this.updateBackWallPosition()
+
+        this.fuelIndicator.setDisplaySize(this.fuel * this.fuelIndicator.width, this.fuelIndicator.height)
+
+        // Уменьшаем уровень топлива с учетом времени прошедшего с последнего обновления
+        this.fuel -= this.fuelDecreaseRate * (dt / 1000); // dt - разница времени в миллисекундах, делим на 1000, чтобы получить секунды
+
+        // Проверяем, чтобы уровень топлива не стал отрицательным
+        if (this.fuel < 0) {
+            this.fuel = 0;
+        }
     }
 
     updateDistance() {
@@ -157,6 +178,7 @@ export class Game extends Phaser.Scene {
 
     updateIndicatorsPositions() {
         this.distanceIndicator.setScrollFactor(0, 0)
+        this.fuelIndicator.setScrollFactor(0, 0)
     }
 
     updateBackWallPosition() {
