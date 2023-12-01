@@ -27,6 +27,8 @@ export class Game extends Phaser.Scene {
 
     private backWall!: Phaser.GameObjects.Sprite
 
+    private surfacePoints: Phaser.Math.Vector2[] = []
+
     init() {
         this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
     }
@@ -61,7 +63,7 @@ export class Game extends Phaser.Scene {
         function updateCarHeight(car: Phaser.Physics.Matter.Sprite) {
             car.setDisplaySize(car.displayWidth, car.displayWidth / 1.93)
         }
-        
+
         function updateWheelSizes(car: Phaser.Physics.Matter.Sprite, wheel: Phaser.Physics.Matter.Sprite) {
             wheel.setDisplaySize(car.displayWidth * 0.22, car.displayWidth * 0.22)
         }
@@ -123,6 +125,37 @@ export class Game extends Phaser.Scene {
         this.wheel2.setCollisionGroup(1)
 
         // карта
+        this.surfacePoints = this.GenerateFieldPoints(0, 2000, 10, 300, 3000, 500, 0.9)
+        const graphics = this.add.graphics();
+
+        // Установите стиль линии и заливку графического объекта
+        graphics.lineStyle(2, 0xffffff);
+        graphics.fillStyle(0xffffff, 0.2);
+
+        // Нарисуйте замкнутую форму, используя точки
+        graphics.beginPath();
+        graphics.moveTo(this.surfacePoints[0].x, this.surfacePoints[0].y);
+        for (let i = 1; i < this.surfacePoints.length; i++) {
+            graphics.lineTo(this.surfacePoints[i].x, this.surfacePoints[i].y);
+        }
+        graphics.closePath();
+
+        // Заливка и отображение графического объекта
+        graphics.fillPath();
+        graphics.strokePath();
+
+        // Создайте текстуру из графического объекта
+        const texture = graphics.generateTexture('surfaceTexture', 5000, 200);
+
+        // Создайте спрайт с использованием текстуры
+        // const shape = this.matter.add.sprite(0, 0, 'surfaceTexture');
+
+        // Установите физические свойства формы
+        // shape.setStatic(true);
+
+        // Удалите графический объект после создания формы
+        // graphics.destroy();
+
 
         // индикаторы
         this.distance = 0
@@ -131,8 +164,6 @@ export class Game extends Phaser.Scene {
         this.fuel = 1
         this.fuelIndicator = this.add.sprite(10, 40, "fuelBar")
         this.fuelIndicator.setOrigin(0, 0)
-
-        
     }
 
     update(t: number, dt: number) {
@@ -144,7 +175,7 @@ export class Game extends Phaser.Scene {
         } else if (this.cursors.right?.isDown) {
             this.wheel1.setAngularVelocity(speed)
             this.wheel2.setAngularVelocity(speed)
-        } 
+        }
 
         this.updateDistance()
 
@@ -161,7 +192,7 @@ export class Game extends Phaser.Scene {
         if (this.fuel < 0) {
             this.fuel = 0;
         }
-    }
+    };
 
     updateDistance() {
         const oneMetre = 125
@@ -173,12 +204,12 @@ export class Game extends Phaser.Scene {
         }
 
         this.distanceIndicator.setText(this.distance.toString() + "m")
-    }
+    };
 
     updateIndicatorsPositions() {
         this.distanceIndicator.setScrollFactor(0, 0)
         this.fuelIndicator.setScrollFactor(0, 0)
-    }
+    };
 
     updateBackWallPosition() {
         const backWallOffset = 400
@@ -190,6 +221,32 @@ export class Game extends Phaser.Scene {
         }
 
         this.backWall.y = newY
+    };
+
+    GenerateFieldPoints(startX: number, finishX: number, stepX: number = 1, minY: number = -500,
+        maxY: number = 500, heightCoef: number = 10, splineCoef: number = 0.05) {
+        let xArr: number[] = [];
+        let yArr: number[] = [];
+        let temp: number = 0;
+
+        for (let x = startX; x <= finishX; x += stepX) {
+            xArr.push(x);
+            let y: number = Math.floor((Math.random() - .5) * heightCoef);
+
+            if (y > maxY || y < minY) {
+                y *= .5;
+            }
+
+            temp += (y - temp) * splineCoef
+            yArr.push(y);
+        }
+
+        let points: Phaser.Math.Vector2[] = [];
+        for (let i = 0; i < xArr.length; i++) {
+            points.push(new Phaser.Math.Vector2(xArr[i], 720 + yArr[i]))
+        }
+
+        return points
     }
-    
+
 }
