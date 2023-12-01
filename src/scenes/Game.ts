@@ -40,7 +40,6 @@ export class Game extends Phaser.Scene {
         this.height = this.scale.height
 
         let shapes = this.cache.json.get('shapes');
-        let wheelShapes = this.cache.json.get('wheelShapes')
 
         const backWallWidth = 20
         this.backWall = this.matter.add.sprite(0, 0, 'backWall');
@@ -51,9 +50,9 @@ export class Game extends Phaser.Scene {
         this.startPosX = 300
         this.startPosY = 200
 
-        this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: shapes.car })
+        this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: shapes.carBody })
         this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.wheel })
-        this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel2', undefined, { shape: shapes.wheel })
+        this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.wheel })
 
         const carWidth = 250
 
