@@ -51,8 +51,8 @@ export class Game extends Phaser.Scene {
         this.startPosY = 200
 
         this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: shapes.carBody })
-        this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.wheel })
-        this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.wheel })
+        this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.carWheel })
+        this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.carWheel })
 
         const carWidth = 250
 
