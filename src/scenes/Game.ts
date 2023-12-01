@@ -41,6 +41,36 @@ export class Game extends Phaser.Scene {
         this.width = this.scale.width
         this.height = this.scale.height
 
+        // карта
+        this.surfacePoints = this.GenerateFieldPoints(0, 5000, 40, 200, 1000, 40, 0.05)
+        const graphics = this.add.graphics()
+
+        // Установите стиль линии и заливку графического объекта
+        graphics.lineStyle(2, 0xffffff)
+        graphics.fillStyle(0xffffff, 0.2)
+
+        // Нарисуйте замкнутую форму, используя точки
+        graphics.beginPath();
+        graphics.moveTo(this.surfacePoints[0].x, this.surfacePoints[0].y)
+        for (let i = 1; i < this.surfacePoints.length; i++) {
+            graphics.lineTo(this.surfacePoints[i].x, this.surfacePoints[i].y)
+            graphics.moveTo(this.surfacePoints[i].x, this.surfacePoints[i].y)
+        }
+        graphics.lineTo(this.surfacePoints[0].x, this.surfacePoints[0].y)
+        graphics.moveTo(this.surfacePoints[0].x, this.surfacePoints[0].y)
+        graphics.closePath()
+        // graphics.closePath();
+
+        // Заливка и отображение графического объекта
+        graphics.fillPath()
+        // graphics.strokePath()
+
+        const mapBody = this.matter.add.fromVertices(0, 720, this.surfacePoints, { isStatic: true })
+        mapBody.gameObject = graphics // Привязка графического объекта к физическому телу
+
+        // Удалите графический объект после создания формы
+        // graphics.destroy();
+
         let shapes = this.cache.json.get('shapes');
 
         const backWallWidth = 20
@@ -50,7 +80,7 @@ export class Game extends Phaser.Scene {
         this.matter.body.setInertia(this.backWall.body as MatterJS.BodyType, Infinity);
 
         this.startPosX = 300
-        this.startPosY = 200
+        this.startPosY = 100
 
         this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: shapes.carBody })
         this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.carWheel })
@@ -124,39 +154,6 @@ export class Game extends Phaser.Scene {
         this.wheel1.setCollisionGroup(1)
         this.wheel2.setCollisionGroup(1)
 
-        // карта
-        this.surfacePoints = this.GenerateFieldPoints(0, 2000, 10, 300, 3000, 500, 0.9)
-        const graphics = this.add.graphics();
-
-        // Установите стиль линии и заливку графического объекта
-        graphics.lineStyle(2, 0xffffff);
-        graphics.fillStyle(0xffffff, 0.2);
-
-        // Нарисуйте замкнутую форму, используя точки
-        graphics.beginPath();
-        graphics.moveTo(this.surfacePoints[0].x, this.surfacePoints[0].y);
-        for (let i = 1; i < this.surfacePoints.length; i++) {
-            graphics.lineTo(this.surfacePoints[i].x, this.surfacePoints[i].y);
-        }
-        graphics.closePath();
-
-        // Заливка и отображение графического объекта
-        graphics.fillPath();
-        graphics.strokePath();
-
-        // Создайте текстуру из графического объекта
-        const texture = graphics.generateTexture('surfaceTexture', 5000, 200);
-
-        // Создайте спрайт с использованием текстуры
-        // const shape = this.matter.add.sprite(0, 0, 'surfaceTexture');
-
-        // Установите физические свойства формы
-        // shape.setStatic(true);
-
-        // Удалите графический объект после создания формы
-        // graphics.destroy();
-
-
         // индикаторы
         this.distance = 0
         this.distanceIndicator = this.add.text(10, 10, "", { fontFamily: "Arial", fontSize: 28, color: "#ffffff" })
@@ -167,7 +164,7 @@ export class Game extends Phaser.Scene {
     }
 
     update(t: number, dt: number) {
-        const speed = 0.5;
+        const speed = 0.3;
 
         if (this.cursors.left?.isDown) {
             this.wheel1.setAngularVelocity(-speed)
@@ -240,11 +237,15 @@ export class Game extends Phaser.Scene {
             temp += (y - temp) * splineCoef
             yArr.push(y);
         }
+        
 
         let points: Phaser.Math.Vector2[] = [];
+        points.push(new Phaser.Math.Vector2(startX, minY))
         for (let i = 0; i < xArr.length; i++) {
-            points.push(new Phaser.Math.Vector2(xArr[i], 720 + yArr[i]))
+            points.push(new Phaser.Math.Vector2(xArr[i], yArr[i]))
         }
+
+        points.push(new Phaser.Math.Vector2(finishX, minY))
 
         return points
     }
