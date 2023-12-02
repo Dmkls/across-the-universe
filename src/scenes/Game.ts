@@ -1,5 +1,5 @@
-import Phaser, { NONE } from "phaser";
-import { Collision, Composite, Composites } from "matter";
+import Phaser, { NONE } from "phaser"
+import { Collision, Composite, Composites } from "matter"
 
 export class Game extends Phaser.Scene {
 
@@ -11,6 +11,9 @@ export class Game extends Phaser.Scene {
     private wheel1!: Phaser.Physics.Matter.Sprite
     private wheel2!: Phaser.Physics.Matter.Sprite
     private items: Phaser.Physics.Matter.Sprite[] = []
+
+    private characterBody!: Phaser.Physics.Matter.Sprite
+    private characterHead!: Phaser.Physics.Matter.Sprite
 
     private width!: number
     private height!: number
@@ -48,12 +51,10 @@ export class Game extends Phaser.Scene {
         this.surfacePoints = this.GenerateFieldPoints(0, 10000, 40, 200, 1000, 40, 0.05)
         const graphics = this.add.graphics()
 
-        // Установите стиль линии и заливку графического объекта
         graphics.lineStyle(2, 0xffffff)
         graphics.fillStyle(0xffffff, 0.2)
 
-        // Нарисуйте замкнутую форму, используя точки
-        graphics.beginPath();
+        graphics.beginPath()
         graphics.moveTo(this.surfacePoints[0].x, 720 + this.surfacePoints[0].y)
         for (let i = 1; i < this.surfacePoints.length; i++) {
             graphics.lineTo(this.surfacePoints[i].x, 720 + this.surfacePoints[i].y)
@@ -70,29 +71,43 @@ export class Game extends Phaser.Scene {
         const mapBody = this.matter.add.fromVertices(5000, 720, this.surfacePoints, { isStatic: true })
         mapBody.gameObject = graphics // Привязка графического объекта к физическому телу
 
-        // graphics.destroy();
+        // graphics.destroy()
 
-        this.shapes = this.cache.json.get('shapes');
+        this.shapes = this.cache.json.get('shapes')
 
         const backWallWidth = 20
-        this.backWall = this.matter.add.sprite(0, 0, 'backWall');
+        this.backWall = this.matter.add.sprite(0, 0, 'backWall')
         this.backWall.setDisplaySize(backWallWidth, this.width)
-        this.matter.body.setStatic(this.backWall.body as MatterJS.BodyType, true);
-        this.matter.body.setInertia(this.backWall.body as MatterJS.BodyType, Infinity);
+        this.matter.body.setStatic(this.backWall.body as MatterJS.BodyType, true)
+        this.matter.body.setInertia(this.backWall.body as MatterJS.BodyType, Infinity)
 
         this.startPosX = 300
         this.startPosY = 100
+        
+        this.characterHead = this.matter.add.sprite(0, 0, 'driverHead', undefined, { shape: this.shapes.driverHead})
+        this.characterBody = this.matter.add.sprite(0, 100, 'driverBody', undefined, { shape: this.shapes.driverBody })
 
         this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: this.shapes.carBody })
         this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: this.shapes.carWheel })
         this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: this.shapes.carWheel })
+
+        this.characterHead.setDisplaySize(50 * 1.079646, 50)
+        this.characterBody.setDisplaySize(40 * 1.71428, 40)
+
+        const characterBodyShape = this.characterBody.body as MatterJS.BodyType
+        const characterHeadShape = this.characterHead.body as MatterJS.BodyType
+
+        // const neckJoint = this.matter.add.joint(characterBodyShape, characterHeadShape, 100, 1);
+
+        // Установка ограничений соединения 
+        // neckJoint.stiffness = 1; // Жесткость сустава (от 0 до 1, где 1 - максимальная жесткость)
+        // neckJoint.length = 0;
 
         this.addCoin(1000, 600, 500)
         this.addCoin(1080, 600, 100)
         this.addCoin(1150, 600, 100)
 
         this.addFuel(1300, 600)
-
 
         const carWidth = 250
         this.car.setDisplaySize(carWidth, 1)
@@ -149,11 +164,37 @@ export class Game extends Phaser.Scene {
             }
         )
 
+        this.matter.add.constraint(
+            carBody,
+            characterBodyShape,
+            0,
+            0,
+            {
+                // pointA: {
+                //     x: 0,
+                //     y: 0
+                // }
+            }
+        )
+
+        this.matter.add.constraint(
+            carBody,
+            characterHeadShape,
+            0,
+            0,
+            {
+                pointA: {
+                    x: -15,
+                    y: -60
+                }
+            }
+        )
+
         // камера 
-        this.cameras.main.startFollow(this.car);
-        this.cameras.main.setFollowOffset(-175, 100); // Фиксация горизонтального положения, смещение по вертикали
-        this.cameras.main.setDeadzone(0, 0); // Зона смягчения, в которой объект может перемещаться без активации камеры
-        this.cameras.main.setLerp(1, 1); // Настройка скорости следования камеры (значения от 0 до 1)
+        this.cameras.main.startFollow(this.car)
+        this.cameras.main.setFollowOffset(-175, 100) // Фиксация горизонтального положения, смещение по вертикали
+        this.cameras.main.setDeadzone(0, 0) // Зона смягчения, в которой объект может перемещаться без активации камеры
+        this.cameras.main.setLerp(1, 1) // Настройка скорости следования камеры (значения от 0 до 1)
 
         // коллизиции
         this.wheel1.setCollisionCategory(1)
@@ -171,7 +212,7 @@ export class Game extends Phaser.Scene {
     }
 
     update(t: number, dt: number) {
-        const speed = 0.3;
+        const speed = 0.7
 
         if (this.cursors.left?.isDown) {
             this.wheel1.setAngularVelocity(-speed)
@@ -190,13 +231,15 @@ export class Game extends Phaser.Scene {
         this.fuelIndicator.setDisplaySize(this.fuel * this.fuelIndicator.width, this.fuelIndicator.height)
 
         // Уменьшаем уровень топлива с учетом времени прошедшего с последнего обновления
-        this.fuel -= this.fuelDecreaseRate * (dt / 1000); // dt - разница времени в миллисекундах, делим на 1000, чтобы получить секунды
+        this.fuel -= this.fuelDecreaseRate * (dt / 1000) // dt - разница времени в миллисекундах, делим на 1000, чтобы получить секунды
 
-        // Проверяем, чтобы уровень топлива не стал отрицательным
         if (this.fuel < 0) {
-            this.fuel = 0;
+            this.fuel = 0
         }
-    };
+
+        this.characterBody.setRotation(Math.PI / 2 + this.car.rotation)
+        this.characterHead.setRotation(Math.PI / 2 + this.car.rotation - Math.PI / 12)
+    }
 
     updateDistance() {
         const oneMetre = 125
@@ -208,12 +251,12 @@ export class Game extends Phaser.Scene {
         }
 
         this.distanceIndicator.setText(this.distance.toString() + "m")
-    };
+    }
 
     updateIndicatorsPositions() {
         this.distanceIndicator.setScrollFactor(0, 0)
         this.fuelIndicator.setScrollFactor(0, 0)
-    };
+    }
 
     updateBackWallPosition() {
         const backWallOffset = 400
@@ -225,28 +268,28 @@ export class Game extends Phaser.Scene {
         }
 
         this.backWall.y = newY
-    };
+    }
 
     GenerateFieldPoints(startX: number, finishX: number, stepX: number = 1, minY: number = -500,
         maxY: number = 500, heightCoef: number = 10, splineCoef: number = 0.05) {
-        let xArr: number[] = [];
-        let yArr: number[] = [];
-        let temp: number = 0;
+        let xArr: number[] = []
+        let yArr: number[] = []
+        let temp: number = 0
 
         for (let x = startX; x <= finishX; x += stepX) {
-            xArr.push(x);
-            let y: number = Math.floor((Math.random() - .5) * heightCoef);
+            xArr.push(x)
+            let y: number = Math.floor((Math.random() - .5) * heightCoef)
 
             if (y > maxY || y < minY) {
-                y *= .5;
+                y *= .5
             }
 
             temp += (y - temp) * splineCoef
-            yArr.push(y);
+            yArr.push(y)
         }
 
 
-        let points: Phaser.Math.Vector2[] = [];
+        let points: Phaser.Math.Vector2[] = []
         points.push(new Phaser.Math.Vector2(startX, minY))
         for (let i = 0; i < xArr.length; i++) {
             points.push(new Phaser.Math.Vector2(xArr[i], yArr[i]))
@@ -258,19 +301,19 @@ export class Game extends Phaser.Scene {
     }
 
     addItem(x: number = 0, y: number = 0, type: string, size: number) {
-        let itemShape;
+        let itemShape
 
         const baseType = type.includes("coin") ? "coin" : type
         switch (baseType) {
             case "coin":
-                itemShape = this.shapes.coin;
-                break;
+                itemShape = this.shapes.coin
+                break
             case "fuel":
-                itemShape = this.shapes.fuel;
-                break;
+                itemShape = this.shapes.fuel
+                break
             default:
-                itemShape = undefined;
-                break;
+                itemShape = undefined
+                break
         }
 
         const newItem = this.matter.add.sprite(x, y, type, undefined, {
@@ -281,12 +324,11 @@ export class Game extends Phaser.Scene {
 
         newItem.setDisplaySize(size, size)
 
-        // Установите коллбэк столкновения монеты с колесами
         this.matter.world.on(Phaser.Physics.Matter.Events.COLLISION_START, (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
-            const { pairs } = event;
+            const { pairs } = event
 
             pairs.forEach(pair => {
-                const { bodyA, bodyB } = pair;
+                const { bodyA, bodyB } = pair
 
                 if ((bodyA.gameObject === newItem) || (bodyB.gameObject === newItem)) {
                     newItem.setCollidesWith(0)
@@ -305,27 +347,27 @@ export class Game extends Phaser.Scene {
                         targets: newItem,
                         y: newItem.y - 100,
                         alpha: 0,
-                        duration: 300, // Длительность анимации в миллисекундах (в данном случае полсекунды)
+                        duration: 300, 
                         onComplete: () => {
                             if (newItem.body) {
                                 if (newItem && !newItem.scene) {
-                                    newItem.destroy(); // Удаляем монетку, если она существует
+                                    newItem.destroy()
                                 }
                             }
                         }
-                    });
+                    })
                 }
-            });
-        });
+            })
+        })
     }
 
     addCoin(x: number, y: number, value: number) {
-        const coinSize = 50
+        const coinSize = 70
         this.addItem(x, y, "coin" + value.toString(), coinSize)
     }
 
     addFuel(x: number, y: number) {
-        const fuelSize = 80
+        const fuelSize = 70
         this.addItem(x, y, "fuel", fuelSize)
     }
 
