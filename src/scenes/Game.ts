@@ -5,9 +5,12 @@ export class Game extends Phaser.Scene {
 
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
 
+    private shapes!: any
+
     private car!: Phaser.Physics.Matter.Sprite
     private wheel1!: Phaser.Physics.Matter.Sprite
     private wheel2!: Phaser.Physics.Matter.Sprite
+    private items: Phaser.Physics.Matter.Sprite[] = []
 
     private width!: number
     private height!: number
@@ -42,7 +45,7 @@ export class Game extends Phaser.Scene {
         this.height = this.scale.height
 
         // карта
-        this.surfacePoints = this.GenerateFieldPoints(0, 5000, 40, 200, 1000, 40, 0.05)
+        this.surfacePoints = this.GenerateFieldPoints(0, 10000, 40, 200, 1000, 40, 0.05)
         const graphics = this.add.graphics()
 
         // Установите стиль линии и заливку графического объекта
@@ -51,27 +54,25 @@ export class Game extends Phaser.Scene {
 
         // Нарисуйте замкнутую форму, используя точки
         graphics.beginPath();
-        graphics.moveTo(this.surfacePoints[0].x, this.surfacePoints[0].y)
+        graphics.moveTo(this.surfacePoints[0].x, 720 + this.surfacePoints[0].y)
         for (let i = 1; i < this.surfacePoints.length; i++) {
-            graphics.lineTo(this.surfacePoints[i].x, this.surfacePoints[i].y)
-            graphics.moveTo(this.surfacePoints[i].x, this.surfacePoints[i].y)
+            graphics.lineTo(this.surfacePoints[i].x, 720 + this.surfacePoints[i].y)
+            graphics.moveTo(this.surfacePoints[i].x, 720 + this.surfacePoints[i].y)
         }
-        graphics.lineTo(this.surfacePoints[0].x, this.surfacePoints[0].y)
-        graphics.moveTo(this.surfacePoints[0].x, this.surfacePoints[0].y)
+        graphics.lineTo(this.surfacePoints[0].x, 720 + this.surfacePoints[0].y)
+        graphics.moveTo(this.surfacePoints[0].x, 720 + this.surfacePoints[0].y)
         graphics.closePath()
-        // graphics.closePath();
 
         // Заливка и отображение графического объекта
-        graphics.fillPath()
+        // graphics.fillPath()
         // graphics.strokePath()
 
-        const mapBody = this.matter.add.fromVertices(0, 720, this.surfacePoints, { isStatic: true })
+        const mapBody = this.matter.add.fromVertices(5000, 720, this.surfacePoints, { isStatic: true })
         mapBody.gameObject = graphics // Привязка графического объекта к физическому телу
 
-        // Удалите графический объект после создания формы
         // graphics.destroy();
 
-        let shapes = this.cache.json.get('shapes');
+        this.shapes = this.cache.json.get('shapes');
 
         const backWallWidth = 20
         this.backWall = this.matter.add.sprite(0, 0, 'backWall');
@@ -82,12 +83,18 @@ export class Game extends Phaser.Scene {
         this.startPosX = 300
         this.startPosY = 100
 
-        this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: shapes.carBody })
-        this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.carWheel })
-        this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: shapes.carWheel })
+        this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: this.shapes.carBody })
+        this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: this.shapes.carWheel })
+        this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: this.shapes.carWheel })
+
+        this.addCoin(1000, 600, 500)
+        this.addCoin(1080, 600, 100)
+        this.addCoin(1150, 600, 100)
+
+        this.addFuel(1300, 600)
+
 
         const carWidth = 250
-
         this.car.setDisplaySize(carWidth, 1)
 
         function updateCarHeight(car: Phaser.Physics.Matter.Sprite) {
@@ -237,7 +244,7 @@ export class Game extends Phaser.Scene {
             temp += (y - temp) * splineCoef
             yArr.push(y);
         }
-        
+
 
         let points: Phaser.Math.Vector2[] = [];
         points.push(new Phaser.Math.Vector2(startX, minY))
@@ -248,6 +255,78 @@ export class Game extends Phaser.Scene {
         points.push(new Phaser.Math.Vector2(finishX, minY))
 
         return points
+    }
+
+    addItem(x: number = 0, y: number = 0, type: string, size: number) {
+        let itemShape;
+
+        const baseType = type.includes("coin") ? "coin" : type
+        switch (baseType) {
+            case "coin":
+                itemShape = this.shapes.coin;
+                break;
+            case "fuel":
+                itemShape = this.shapes.fuel;
+                break;
+            default:
+                itemShape = undefined;
+                break;
+        }
+
+        const newItem = this.matter.add.sprite(x, y, type, undefined, {
+            shape: itemShape,
+            isStatic: true,
+            isSensor: true
+        })
+
+        newItem.setDisplaySize(size, size)
+
+        // Установите коллбэк столкновения монеты с колесами
+        this.matter.world.on(Phaser.Physics.Matter.Events.COLLISION_START, (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
+            const { pairs } = event;
+
+            pairs.forEach(pair => {
+                const { bodyA, bodyB } = pair;
+
+                if ((bodyA.gameObject === newItem) || (bodyB.gameObject === newItem)) {
+                    newItem.setCollidesWith(0)
+
+                    switch (baseType) {
+                        case "fuel":
+                            this.fuel = 1
+                            break
+                        case "coin":
+                            break
+                        default:
+                            break
+                    }
+
+                    this.tweens.add({
+                        targets: newItem,
+                        y: newItem.y - 100,
+                        alpha: 0,
+                        duration: 300, // Длительность анимации в миллисекундах (в данном случае полсекунды)
+                        onComplete: () => {
+                            if (newItem.body) {
+                                if (newItem && !newItem.scene) {
+                                    newItem.destroy(); // Удаляем монетку, если она существует
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    addCoin(x: number, y: number, value: number) {
+        const coinSize = 50
+        this.addItem(x, y, "coin" + value.toString(), coinSize)
+    }
+
+    addFuel(x: number, y: number) {
+        const fuelSize = 80
+        this.addItem(x, y, "fuel", fuelSize)
     }
 
 }
