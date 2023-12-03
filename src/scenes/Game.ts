@@ -26,9 +26,9 @@ export class Game extends Phaser.Scene {
         let shapes = this.cache.json.get('shapes');
 
 
-        const car = this.matter.add.sprite(200, 200, 'car', undefined, { shape: shapes.car })
-        const wheel = this.matter.add.sprite(40, 245, 'wheel', undefined, { shape: shapes.wheel })
-        const wheel2 = this.matter.add.sprite(360, 245, 'wheel2', undefined, { shape: shapes.wheel })
+        const car = this.matter.add.sprite(250, 200, 'car', undefined, { shape: shapes.car })
+        const wheel = this.matter.add.sprite(90, 245, 'wheel', undefined, { shape: shapes.wheel })
+        const wheel2 = this.matter.add.sprite(410, 245, 'wheel2', undefined, { shape: shapes.wheel })
         // const ground = this.matter.add.image(0, 500, 'ground')
 
         this.car = car
@@ -109,22 +109,20 @@ export class Game extends Phaser.Scene {
         this.cameras.main.setDeadzone(0, 0); // Зона смягчения, в которой объект может перемещаться без активации камеры
         this.cameras.main.setLerp(1, 1); // Настройка скорости следования камеры (значения от 0 до 1)
         // this.cameras.main.setBounds(0, 0, mapWidth, this.scale.height);
-//         wheel.setFriction(10)
+         wheel.setFriction(5)
+         wheel.setFriction(5)
+
 
     }
 
     update(t: number, dt: number) {
 
         if (this.cursors.left.isDown) {
-            this.wheel.setVelocity(-10, 0)
-            this.wheel2.setVelocity(-10, 0)
+            this.wheel.applyForceFrom({x: this.wheel.height/2, y: this.wheel.height/2} as Phaser.Math.Vector2, {x: -0.01, y: 0.0} as Phaser.Math.Vector2)
+            this.wheel2.applyForceFrom({x: this.wheel.height/2, y: this.wheel.height/2} as Phaser.Math.Vector2, {x: -0.01, y: 0.0} as Phaser.Math.Vector2)
         } else if (this.cursors.right.isDown) {
-            this.wheel.setVelocity(10, 0)
-            this.wheel2.setVelocity(-10, 0)
+            this.wheel.applyForceFrom({x: this.wheel.height/2, y: this.wheel.height/2} as Phaser.Math.Vector2, {x: 0.01, y: 0.0} as Phaser.Math.Vector2)
+            this.wheel2.applyForceFrom({x: this.wheel.height/2, y: this.wheel.height/2} as Phaser.Math.Vector2, {x: 0.01, y: 0.0} as Phaser.Math.Vector2)
         }
-
-        // const carBody = car.body as MatterJS.BodyType
-        // const mapWidth = this.mapHitboxPoints[this.mapHitboxPoints.length - 1].x
-        // this.cameras.main.setBounds(carBody.position.x - car.width / 2, 0, mapWidth, this.scale.height);
     }
 }
