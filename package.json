@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run build && npm run static-server",
     "build": "npm run clean && cross-env NODE_ENV=production webpack --config ./webpack/webpack.prod.js",
-    "develop": "cross-env NODE_ENV=development webpack serve --config ./webpack/webpack.dev.js",
+    "dev": "cross-env NODE_ENV=development webpack serve --config ./webpack/webpack.dev.js",
     "static-server": "static-server ./build",
     "clean": "rimraf build"
   },
@@ -42,6 +42,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "phaser": "^3.70.0"
+    "phaser": "^3.70.0",
+    "typescript-cubic-spline": "^1.0.1"
   }
 }

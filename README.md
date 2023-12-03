@@ -1,2 +1,9 @@
 # Across the Universe
-2d desktop game in style of Hill Climb Racing
+2D игра, пародия на `Hill Climb Racing`
+
+
+## Пояснения
+- `npm install` &mdash; установка нужных модулей
+- `npm run dev` &mdash; запуск локального сервера (c горячей перезагрузкой)
+
+Впринципе этих команд должно хватить пока что, но если что все команды определены в package.json под ключом `"scripts"`
