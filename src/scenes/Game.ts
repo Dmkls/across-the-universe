@@ -1,5 +1,6 @@
 import Phaser, { NONE } from "phaser"
 import { Collision, Composite, Composites } from "matter"
+import Spline from 'typescript-cubic-spline'
 
 export class Game extends Phaser.Scene {
 
@@ -10,10 +11,12 @@ export class Game extends Phaser.Scene {
     private car!: Phaser.Physics.Matter.Sprite
     private wheel1!: Phaser.Physics.Matter.Sprite
     private wheel2!: Phaser.Physics.Matter.Sprite
-    private items: Phaser.Physics.Matter.Sprite[] = []
+    // private items: Phaser.Physics.Matter.Sprite[] = []
 
     private characterBody!: Phaser.Physics.Matter.Sprite
     private characterHead!: Phaser.Physics.Matter.Sprite
+
+    private surfacePoints: Phaser.Math.Vector2[] = []
 
     private width!: number
     private height!: number
@@ -22,7 +25,8 @@ export class Game extends Phaser.Scene {
     private fuelDecreaseRate: number = this.maxFuel / 30
 
     private fuel: number = this.maxFuel
-    private distance!: number
+    private distance: number = 0
+    private moneyCounter: number = 0
 
     private startPosX!: number
     private startPosY!: number
@@ -31,9 +35,11 @@ export class Game extends Phaser.Scene {
     private moneyIndicator!: Phaser.GameObjects.Text
     private fuelIndicator!: Phaser.GameObjects.Sprite
 
+    private moneyIcon!: Phaser.GameObjects.Image
+
     private backWall!: Phaser.GameObjects.Sprite
 
-    private surfacePoints: Phaser.Math.Vector2[] = []
+    private generatedDistance: number = 0// px
 
     init() {
         this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
@@ -47,32 +53,6 @@ export class Game extends Phaser.Scene {
         this.width = this.scale.width
         this.height = this.scale.height
 
-        // карта
-        this.surfacePoints = this.GenerateFieldPoints(0, 10000, 40, 200, 1000, 40, 0.05)
-        const graphics = this.add.graphics()
-
-        graphics.lineStyle(2, 0xffffff)
-        graphics.fillStyle(0xffffff, 0.2)
-
-        graphics.beginPath()
-        graphics.moveTo(this.surfacePoints[0].x, 720 + this.surfacePoints[0].y)
-        for (let i = 1; i < this.surfacePoints.length; i++) {
-            graphics.lineTo(this.surfacePoints[i].x, 720 + this.surfacePoints[i].y)
-            graphics.moveTo(this.surfacePoints[i].x, 720 + this.surfacePoints[i].y)
-        }
-        graphics.lineTo(this.surfacePoints[0].x, 720 + this.surfacePoints[0].y)
-        graphics.moveTo(this.surfacePoints[0].x, 720 + this.surfacePoints[0].y)
-        graphics.closePath()
-
-        // Заливка и отображение графического объекта
-        // graphics.fillPath()
-        // graphics.strokePath()
-
-        const mapBody = this.matter.add.fromVertices(5000, 720, this.surfacePoints, { isStatic: true })
-        mapBody.gameObject = graphics // Привязка графического объекта к физическому телу
-
-        // graphics.destroy()
-
         this.shapes = this.cache.json.get('shapes')
 
         const backWallWidth = 20
@@ -82,9 +62,9 @@ export class Game extends Phaser.Scene {
         this.matter.body.setInertia(this.backWall.body as MatterJS.BodyType, Infinity)
 
         this.startPosX = 300
-        this.startPosY = 100
-        
-        this.characterHead = this.matter.add.sprite(0, 0, 'driverHead', undefined, { shape: this.shapes.driverHead})
+        this.startPosY = 300
+
+        this.characterHead = this.matter.add.sprite(0, 0, 'driverHead', undefined, { shape: this.shapes.driverHead })
         this.characterBody = this.matter.add.sprite(0, 100, 'driverBody', undefined, { shape: this.shapes.driverBody })
 
         this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: this.shapes.carBody })
@@ -102,6 +82,20 @@ export class Game extends Phaser.Scene {
         // Установка ограничений соединения 
         // neckJoint.stiffness = 1; // Жесткость сустава (от 0 до 1, где 1 - максимальная жесткость)
         // neckJoint.length = 0;
+
+        // this.surfacePoints = this.generateSurfacePoints(0, 200, 10, -30, 200, 10)
+        // console.log(this.surfacePoints)
+
+        // for (let i = 0; i < this.surfacePoints.length - 1; i++) {
+        //     this.addLine(this.surfacePoints[i], this.surfacePoints[i + 1])
+        // }
+
+        // this.surfacePoints = this.generateSurfacePoints(1800, 200, 10, -30, 200, 10)
+        // console.log(this.surfacePoints)
+
+        // for (let i = 0; i < this.surfacePoints.length - 1; i++) {
+        //     this.addLine(this.surfacePoints[i], this.surfacePoints[i + 1])
+        // }
 
         this.addCoin(1000, 600, 500)
         this.addCoin(1080, 600, 100)
@@ -124,9 +118,9 @@ export class Game extends Phaser.Scene {
         updateWheelSizes(this.car, this.wheel1)
         updateWheelSizes(this.car, this.wheel2)
 
-        const wheelBounce = 0.5
+        const wheelBounce = 0.1
         const carBounce = 0
-        const wheelFriction = 0.7
+        const wheelFriction = 0.5
 
         this.wheel1.setBounce(wheelBounce)
         this.wheel2.setBounce(wheelBounce)
@@ -170,10 +164,10 @@ export class Game extends Phaser.Scene {
             0,
             0,
             {
-                // pointA: {
-                //     x: 0,
-                //     y: 0
-                // }
+                pointA: {
+                    x: 0,
+                    y: 0
+                }
             }
         )
 
@@ -207,12 +201,18 @@ export class Game extends Phaser.Scene {
         this.distanceIndicator = this.add.text(10, 10, "", { fontFamily: "Arial", fontSize: 28, color: "#ffffff" })
 
         this.fuel = 1
-        this.fuelIndicator = this.add.sprite(10, 40, "fuelBar")
+        this.fuelIndicator = this.add.sprite(10, 45, "fuelBar")
         this.fuelIndicator.setOrigin(0, 0)
+
+        this.moneyCounter = 0 // надо потом сюда записать начальное значение
+        this.moneyIndicator = this.add.text(10, 90, "", { fontFamily: "Arial", fontSize: 28, color: "#ffffff" })
+        this.moneyIcon = this.matter.add.sprite(40, 85, 'coin500', undefined, { isStatic: true })
+        this.moneyIcon.setDisplaySize(40, 40)
+        this.moneyIcon.setOrigin(0, 0)
     }
 
     update(t: number, dt: number) {
-        const speed = 0.7
+        const speed = 0.4
 
         if (this.cursors.left?.isDown) {
             this.wheel1.setAngularVelocity(-speed)
@@ -220,9 +220,11 @@ export class Game extends Phaser.Scene {
         } else if (this.cursors.right?.isDown) {
             this.wheel1.setAngularVelocity(speed)
             this.wheel2.setAngularVelocity(speed)
-        }
+        } 
 
         this.updateDistance()
+
+        this.generateSurface()
 
         this.updateIndicatorsPositions()
 
@@ -251,11 +253,15 @@ export class Game extends Phaser.Scene {
         }
 
         this.distanceIndicator.setText(this.distance.toString() + "m")
+        this.moneyIndicator.setText(this.moneyCounter.toString())
     }
 
     updateIndicatorsPositions() {
         this.distanceIndicator.setScrollFactor(0, 0)
         this.fuelIndicator.setScrollFactor(0, 0)
+        this.moneyIndicator.setScrollFactor(0, 0)
+
+        this.moneyIcon.setScrollFactor(0, 0)
     }
 
     updateBackWallPosition() {
@@ -270,34 +276,84 @@ export class Game extends Phaser.Scene {
         this.backWall.y = newY
     }
 
-    GenerateFieldPoints(startX: number, finishX: number, stepX: number = 1, minY: number = -500,
-        maxY: number = 500, heightCoef: number = 10, splineCoef: number = 0.05) {
+    generateSurfacePoints(xStart: number, xStep: number, pointNumber: number, yMin: number, yMax: number, splineStep: number = 5) {
+        function randomInt(min: number, max: number) {
+            return Math.floor(Math.random() * (max - min + 1)) + min
+        }
+
         let xArr: number[] = []
         let yArr: number[] = []
-        let temp: number = 0
 
-        for (let x = startX; x <= finishX; x += stepX) {
-            xArr.push(x)
-            let y: number = Math.floor((Math.random() - .5) * heightCoef)
+        for (let i = 0; i < pointNumber; i++) {
+            xArr.push(xStart + xStep * i)
+            yArr.push(randomInt(yMin, yMax))
+        }
 
-            if (y > maxY || y < minY) {
-                y *= .5
+        let spline = new Spline(xArr, yArr)
+
+        let pointsTmp: number[][] = []
+        for (let x = xStart; x <= xStep * (pointNumber - 1); x += splineStep) {
+            pointsTmp.push([x, spline.at(x)])
+        }
+
+        console.log(pointsTmp)
+
+        let points: Phaser.Math.Vector2[] = pointsTmp.flatMap(([x, y]) => new Phaser.Math.Vector2(x, y));
+
+        let result: Phaser.Math.Vector2[] = []
+        for (let i = 0; i < points.length; i++) {
+            result.push(new Phaser.Math.Vector2(points[i].x, this.height - points[i].y))
+        }
+
+        return result
+    }
+
+    generateSurface() {
+        if (this.generatedDistance < this.car.x + this.width) {
+            console.log(this.generatedDistance)
+            const xStart: number = this.generatedDistance
+            const xStep: number = 200
+            const pointNumber: number = 10
+            const yMin = -30
+            const yMax = 200
+            const splineStep = 10
+
+            this.surfacePoints = this.generateSurfacePoints(xStart, xStep, pointNumber, yMin, yMax, splineStep)
+            console.log(this.surfacePoints)
+
+            for (let i = 0; i < this.surfacePoints.length - 1; i++) {
+                this.addLine(this.surfacePoints[i], this.surfacePoints[i + 1])
             }
 
-            temp += (y - temp) * splineCoef
-            yArr.push(y)
+            this.generatedDistance = xStart + xStep * (pointNumber - 1)
         }
+    }
 
+    addLine(startPoint: Phaser.Math.Vector2, endPoint: Phaser.Math.Vector2) {
+        // Вычисляем центр массы линии
+        // Вычисляем центр массы линии
+        const massCenterX = startPoint.x;
+        const massCenterY = startPoint.y;
 
-        let points: Phaser.Math.Vector2[] = []
-        points.push(new Phaser.Math.Vector2(startX, minY))
-        for (let i = 0; i < xArr.length; i++) {
-            points.push(new Phaser.Math.Vector2(xArr[i], yArr[i]))
-        }
+        // Создаем отрезок с помощью Phaser.GameObjects.Line
+        // const line = new Phaser.GameObjects.Line(this, startPoint.x, startPoint.y, endPoint.x, endPoint.y, 0xff0000);
 
-        points.push(new Phaser.Math.Vector2(finishX, minY))
+        // Создаем хитбокс отрезка с помощью Matter.js
+        const lineVertices = [
+            { x: startPoint.x - massCenterX, y: startPoint.y - massCenterY },
+            { x: endPoint.x - massCenterX, y: endPoint.y - massCenterY },
+            { x: (startPoint.x + endPoint.x) / 2 - massCenterX, y: (startPoint.y + endPoint.y) / 2 - massCenterY + 20}
+        ]
 
-        return points
+        const lineBody = this.matter.add.fromVertices(massCenterX, massCenterY, lineVertices, { isStatic: true });
+
+        // Связываем отрезок и хитбокс
+        // line.setData('body', lineBody);
+
+        // Добавляем отрезок на сцену
+        // this.add.existing(line);
+
+        // return line;
     }
 
     addItem(x: number = 0, y: number = 0, type: string, size: number) {
@@ -332,12 +388,16 @@ export class Game extends Phaser.Scene {
 
                 if ((bodyA.gameObject === newItem) || (bodyB.gameObject === newItem)) {
                     newItem.setCollidesWith(0)
+                    newItem.setSensor(false)
 
                     switch (baseType) {
                         case "fuel":
                             this.fuel = 1
                             break
                         case "coin":
+                            const coinValue = Number(type.slice(4, type.length))
+                            console.log(coinValue)
+                            this.moneyCounter += coinValue
                             break
                         default:
                             break
@@ -347,7 +407,7 @@ export class Game extends Phaser.Scene {
                         targets: newItem,
                         y: newItem.y - 100,
                         alpha: 0,
-                        duration: 300, 
+                        duration: 300,
                         onComplete: () => {
                             if (newItem.body) {
                                 if (newItem && !newItem.scene) {
