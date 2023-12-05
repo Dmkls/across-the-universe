@@ -40,7 +40,7 @@ export class Game extends Phaser.Scene {
 
     private backWall!: Phaser.GameObjects.Sprite
 
-    private generatedDistance: number = 0// px
+    private generatedDistance: number = 0 // px
 
     init() {
         this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
@@ -91,7 +91,7 @@ export class Game extends Phaser.Scene {
         const characterBodyShape = this.characterBody.body as MatterJS.BodyType
         const characterHeadShape = this.characterHead.body as MatterJS.BodyType
 
-        this.characterHead.setDisplayOrigin(this.characterHead.width, this.characterHead.height / 2)
+        // this.characterHead.setDisplayOrigin(this.characterHead.width, this.characterHead.height / 2)
 
         // const neckJoint = this.matter.add.joint(characterBodyShape, characterHeadShape, 100, 1);
 
@@ -309,14 +309,15 @@ export class Game extends Phaser.Scene {
             yArr.push(randomInt(yMin, yMax))
         }
 
+        console.log(xArr)
+        console.log(yArr)
+
         let spline = new Spline(xArr, yArr)
 
         let pointsTmp: number[][] = []
         for (let x = xStart; x <= xStep * (pointNumber - 1); x += splineStep) {
             pointsTmp.push([x, spline.at(x)])
         }
-
-        console.log(pointsTmp)
 
         let points: Phaser.Math.Vector2[] = pointsTmp.flatMap(([x, y]) => new Phaser.Math.Vector2(x, y));
 
@@ -330,7 +331,6 @@ export class Game extends Phaser.Scene {
 
     generateSurface() {
         if (this.generatedDistance < this.car.x + this.width) {
-            console.log(this.generatedDistance)
             const xStart: number = this.generatedDistance
             const xStep: number = 200
             const pointNumber: number = 10
@@ -339,7 +339,6 @@ export class Game extends Phaser.Scene {
             const splineStep = 10
 
             this.surfacePoints = this.generateSurfacePoints(xStart, xStep, pointNumber, yMin, yMax, splineStep)
-            console.log(this.surfacePoints)
 
             for (let i = 0; i < this.surfacePoints.length - 1; i++) {
                 this.addLine(this.surfacePoints[i], this.surfacePoints[i + 1])
