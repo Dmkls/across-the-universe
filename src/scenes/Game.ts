@@ -15,6 +15,7 @@ export class Game extends Phaser.Scene {
 
     private characterBody!: Phaser.Physics.Matter.Sprite
     private characterHead!: Phaser.Physics.Matter.Sprite
+    private characterDead: boolean = false
 
     private surfacePoints: Phaser.Math.Vector2[] = []
 
@@ -67,6 +68,19 @@ export class Game extends Phaser.Scene {
         this.characterHead = this.matter.add.sprite(0, 0, 'driverHead', undefined, { shape: this.shapes.driverHead })
         this.characterBody = this.matter.add.sprite(0, 100, 'driverBody', undefined, { shape: this.shapes.driverBody })
 
+        this.matter.world.on(Phaser.Physics.Matter.Events.COLLISION_START, (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
+            const { pairs } = event
+
+            pairs.forEach(pair => {
+                const { bodyA, bodyB } = pair
+
+                if (bodyA.gameObject === this.characterHead && (bodyB.gameObject != this.car && bodyB.gameObject != this.characterBody)) {
+                    this.characterDead = true
+                    console.log("player dead")
+                }
+            })
+        })
+
         this.car = this.matter.add.sprite(this.startPosX, this.startPosY, 'car', undefined, { shape: this.shapes.carBody })
         this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: this.shapes.carWheel })
         this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: this.shapes.carWheel })
@@ -76,6 +90,8 @@ export class Game extends Phaser.Scene {
 
         const characterBodyShape = this.characterBody.body as MatterJS.BodyType
         const characterHeadShape = this.characterHead.body as MatterJS.BodyType
+
+        this.characterHead.setDisplayOrigin(this.characterHead.width, this.characterHead.height / 2)
 
         // const neckJoint = this.matter.add.joint(characterBodyShape, characterHeadShape, 100, 1);
 
@@ -206,7 +222,7 @@ export class Game extends Phaser.Scene {
 
         this.moneyCounter = 0 // надо потом сюда записать начальное значение
         this.moneyIndicator = this.add.text(10, 90, "", { fontFamily: "Arial", fontSize: 28, color: "#ffffff" })
-        this.moneyIcon = this.matter.add.sprite(40, 85, 'coin500', undefined, { isStatic: true })
+        this.moneyIcon = this.matter.add.sprite(60, 100, 'coin500', undefined, { isStatic: true })
         this.moneyIcon.setDisplaySize(40, 40)
         this.moneyIcon.setOrigin(0, 0)
     }
@@ -215,6 +231,7 @@ export class Game extends Phaser.Scene {
         const speed = 0.4
 
         if (this.cursors.left?.isDown) {
+
             this.wheel1.setAngularVelocity(-speed)
             this.wheel2.setAngularVelocity(-speed)
         } else if (this.cursors.right?.isDown) {
@@ -239,8 +256,11 @@ export class Game extends Phaser.Scene {
             this.fuel = 0
         }
 
+        if (!this.characterDead) {
+            this.characterHead.setRotation(Math.PI / 2 + this.car.rotation - Math.PI / 12)
+        }
+        
         this.characterBody.setRotation(Math.PI / 2 + this.car.rotation)
-        this.characterHead.setRotation(Math.PI / 2 + this.car.rotation - Math.PI / 12)
     }
 
     updateDistance() {
