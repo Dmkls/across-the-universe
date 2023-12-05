@@ -366,12 +366,8 @@ export class Game extends Phaser.Scene {
 
     addLine(startPoint: Phaser.Math.Vector2, endPoint: Phaser.Math.Vector2) {
         // Вычисляем центр массы линии
-        // Вычисляем центр массы линии
         const massCenterX = startPoint.x;
         const massCenterY = startPoint.y;
-
-        // Создаем отрезок с помощью Phaser.GameObjects.Line
-        // const line = new Phaser.GameObjects.Line(this, startPoint.x, startPoint.y, endPoint.x, endPoint.y, 0xff0000);
 
         // Создаем хитбокс отрезка с помощью Matter.js
         const lineVertices = [
@@ -382,13 +378,14 @@ export class Game extends Phaser.Scene {
 
         const lineBody = this.matter.add.fromVertices(massCenterX, massCenterY, lineVertices, { isStatic: true });
 
-        // Связываем отрезок и хитбокс
-        // line.setData('body', lineBody);
+        // Создание графического объекта
+        const graphics = this.add.graphics();
 
-        // Добавляем отрезок на сцену
-        // this.add.existing(line);
+        // Настройка стиля линии
+        graphics.lineStyle(2, 0xffffff);
 
-        // return line;
+        // Рисование линии между двумя точками
+        graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
 
     addItem(x: number = 0, y: number = 0, type: string, size: number) {
