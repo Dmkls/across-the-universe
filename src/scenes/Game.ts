@@ -241,7 +241,7 @@ export class Game extends Phaser.Scene {
 
         this.updateDistance()
 
-        this.generateSurface()
+        this.generateMap()
 
         this.updateIndicatorsPositions()
 
@@ -309,10 +309,7 @@ export class Game extends Phaser.Scene {
             yArr.push(randomInt(yMin, yMax))
         }
 
-        console.log(xArr)
-        console.log(yArr)
-
-        let spline = new Spline(xArr, yArr)
+        const spline = new Spline(xArr, yArr)
 
         let pointsTmp: number[][] = []
         for (let x = xStart; x <= xStep * (pointNumber - 1); x += splineStep) {
@@ -343,9 +340,20 @@ export class Game extends Phaser.Scene {
             for (let i = 0; i < this.surfacePoints.length - 1; i++) {
                 this.addLine(this.surfacePoints[i], this.surfacePoints[i + 1])
             }
-
+            
             this.generatedDistance = xStart + xStep * (pointNumber - 1)
+            console.log(this.generatedDistance)
         }
+    }
+
+    generateItems() {
+        
+    }
+
+    generateMap() {
+        this.generateSurface()
+
+        this.generateItems()
     }
 
     addLine(startPoint: Phaser.Math.Vector2, endPoint: Phaser.Math.Vector2) {
@@ -415,7 +423,6 @@ export class Game extends Phaser.Scene {
                             break
                         case "coin":
                             const coinValue = Number(type.slice(4, type.length))
-                            console.log(coinValue)
                             this.moneyCounter += coinValue
                             break
                         default:
