@@ -48,7 +48,7 @@ export default class MainMenuScene extends Phaser.Scene
 
         this.load.image('logout', 'assets/images/menu/logout.png')
 
-        this.load.audio('within-you', 'assets/sounds/Within-You-Without-You.m4a')
+        // this.load.audio('within-you', 'assets/sounds/Within-You-Without-You.m4a')
 
     }
 
@@ -56,9 +56,9 @@ export default class MainMenuScene extends Phaser.Scene
         const { width, height } = this.scale
         const alpha: number = 0.5
 
-        const music = this.sound.add('within-you')
-        music.setVolume(0.2)
-        music.play()
+        // const music = this.sound.add('within-you')
+        // music.setVolume(0.2)
+        // music.play()
 
         // Background
         this.add.image(0, 0, 'background').setOrigin(0, 0).setScale(1.2)
@@ -130,6 +130,7 @@ export default class MainMenuScene extends Phaser.Scene
         this.selectButton(this.buttons.length-5)
 
         this.playButton.on('selected', () => {
+            this.buttons = []
             this.scene.start('game')
         })
 
@@ -139,6 +140,11 @@ export default class MainMenuScene extends Phaser.Scene
 
         this.leaderButton.on('selected', () => {
             console.log('credits')
+        })
+
+        this.logoutButton.on('selected', () => {
+            this.buttons = []
+            this.scene.start('start-page')
         })
 
         this.progressBarEngine.on('selected', () => {
@@ -217,7 +223,7 @@ export default class MainMenuScene extends Phaser.Scene
             this.confirmSelection()
         })
         this.logoutButton.on("pointerdown", () => {
-            console.log("logout")
+            this.confirmSelection()
         })
     }
 

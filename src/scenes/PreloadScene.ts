@@ -22,7 +22,7 @@ export class PreloadScene extends Phaser.Scene
 
   create()
   {
-    this.scene.start('main-menu')
+    this.scene.start('start-page')
   }
 
 }
