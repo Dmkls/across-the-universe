@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 # Git
 .git/
-=======
 /node_modules/*
 /dist/*
 /build/
@@ -20,4 +18,3 @@ node_modules/
 # Build
 dist/
 /npm-debug.log
->>>>>>> v_dev

@@ -42,6 +42,8 @@ export class Game extends Phaser.Scene {
 
     private generatedDistance: number = 0 // px
 
+    private esc!: any
+
     init() {
         this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
     }
@@ -51,6 +53,8 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
+        this.esc = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+
         this.width = this.scale.width
         this.height = this.scale.height
 
@@ -237,7 +241,11 @@ export class Game extends Phaser.Scene {
         } else if (this.cursors.right?.isDown) {
             this.wheel1.setAngularVelocity(speed)
             this.wheel2.setAngularVelocity(speed)
-        } 
+        }  else if (this.esc?.isDown) {
+            this.scene.start('main-menu')
+        } else if (this.cursors.space?.isDown) {
+            this.wheel1.setAngularVelocity(0)
+        }
 
         this.updateDistance()
 
