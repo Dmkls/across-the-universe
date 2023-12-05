@@ -24,7 +24,7 @@ export default class StartMenuScene extends Phaser.Scene
     }
 
     preload() {
-        this.load.image('lr-background', 'assets/images/start/background.png')
+        this.load.image('start-background', 'assets/images/start/background.png')
         this.load.image('button', 'assets/images/start/gray.png')
         this.load.image('cursor-hand', 'assets/images/car/wheel.png')
         this.load.image('logout', 'assets/images/menu/logout.png')
@@ -34,7 +34,7 @@ export default class StartMenuScene extends Phaser.Scene
         const { width, height } = this.scale
 
         // Background
-        this.add.image(0, 0, 'lr-background').setOrigin(0, 0).setScale(1.2)
+        this.add.image(0, 0, 'start-background').setOrigin(0, 0).setScale(1.2)
 
         // Play button
         this.loginButton = this.add.image(width-150, height/2, 'button')

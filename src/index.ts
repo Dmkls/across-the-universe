@@ -3,6 +3,8 @@ import {PreloadScene} from "./scenes/PreloadScene";
 import {Game} from "./scenes/Game"
 import MainMenuScene from "./scenes/Main-menu";
 import StartMenuScene from "./scenes/hello";
+import RegistrationScene from "./scenes/registration"
+
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -21,7 +23,10 @@ const config: Phaser.Types.Core.GameConfig = {
       }
     }
   },
-  scene: [PreloadScene, Game, MainMenuScene, StartMenuScene]
+  dom: {
+    createContainer: true
+  },
+  scene: [PreloadScene, Game, MainMenuScene, StartMenuScene, RegistrationScene]
 }
 
 new Phaser.Game(config)

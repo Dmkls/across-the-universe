@@ -22,7 +22,7 @@ export class PreloadScene extends Phaser.Scene
 
   create()
   {
-    this.scene.start('start-page')
+    this.scene.start('registration-page')
   }
 
 }

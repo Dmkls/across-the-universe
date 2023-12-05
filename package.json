@@ -43,6 +43,8 @@
   },
   "dependencies": {
     "phaser": "^3.70.0",
+    "phaser3-rex-plugins": "^1.60.8",
+    "phaser3-rex-plugins-types": "^0.2.0",
     "typescript-cubic-spline": "^1.0.1"
   }
 }

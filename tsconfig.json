@@ -1,4 +1,7 @@
 {
+  "include": [
+    "node_modules/phaser3-rex-plugins-types"
+  ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
