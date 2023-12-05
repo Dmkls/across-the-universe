@@ -320,7 +320,7 @@ export class Game extends Phaser.Scene {
         const spline = new Spline(xArr, yArr)
 
         let pointsTmp: number[][] = []
-        for (let x = xStart; x <= xStep * (pointNumber - 1); x += splineStep) {
+        for (let x = xStart; x <= xStart + xStep * (pointNumber - 1); x += splineStep) {
             pointsTmp.push([x, spline.at(x)])
         }
 
