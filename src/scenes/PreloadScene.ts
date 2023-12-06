@@ -1,14 +1,11 @@
 import Phaser from 'phaser'
 
-export class PreloadScene extends Phaser.Scene
-{
-  constructor()
-  {
+export class PreloadScene extends Phaser.Scene {
+  constructor() {
     super('preloader')
   }
 
-  preload()
-  {
+  preload() {
     this.load.image('car', 'assets/images/car/body.png')
     this.load.image('wheel', 'assets/images/car/wheel.png')
     this.load.image('coin500', 'assets/images/items/coin500.png')
@@ -20,9 +17,7 @@ export class PreloadScene extends Phaser.Scene
     this.load.json('shapes', 'assets/JSONs/shapes.json')
   }
 
-  create()
-  {
+  create() {
     this.scene.start('main-menu')
   }
-
 }
