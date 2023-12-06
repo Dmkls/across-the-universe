@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import {PreloadScene} from "./scenes/PreloadScene";
 import {Game} from "./scenes/Game"
 import MainMenuScene from "./scenes/Main-menu";
-import StartMenuScene from "./scenes/hello";
+import StartMenuScene from "./scenes/start";
 import RegistrationScene from "./scenes/registration"
 
 

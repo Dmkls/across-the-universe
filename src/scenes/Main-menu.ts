@@ -35,7 +35,7 @@ export default class MainMenuScene extends Phaser.Scene
         this.load.image('gray', 'assets/images/menu/gray.png')
         this.load.image('cursor-hand', 'assets/images/fuel.png')
         this.load.image('car-full', 'assets/images/menu/car.png')
-        this.load.image('background', 'assets/images/menu/background.png')
+        this.load.image('background', 'assets/images/menu/bg.jpg')
         this.load.image('none', 'assets/images/menu/1x1.png')
         this.load.image('top-bar-background', 'assets/images/menu/top-bar.png')
         this.load.image('play', 'assets/images/menu/play.png')
@@ -61,7 +61,7 @@ export default class MainMenuScene extends Phaser.Scene
         // music.play()
 
         // Background
-        this.add.image(0, 0, 'background').setOrigin(0, 0).setScale(1.2)
+        this.add.image(0, -250, 'background').setOrigin(0, 0).setDisplaySize(1300, 970)
 
         // Menu top-bar
         this.add.image(0,0, 'top-bar-background').setOrigin(0, 0).setAlpha(0.7)
@@ -238,7 +238,9 @@ export default class MainMenuScene extends Phaser.Scene
         const button = this.buttons[index]
 
         // set the newly selected button to a green tint
-        button.setTint(0x66ff7f)
+        if (index < 4) {
+            button.setTint(0x66ff7f)
+        }
         // button.displayHeight *= 1.1
         // button.displayWidth *= 1.1
 

@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 import * as events from "events"
 
-
 export default class StartMenuScene extends Phaser.Scene
 {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
