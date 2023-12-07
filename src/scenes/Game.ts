@@ -23,6 +23,10 @@ export class Game extends Phaser.Scene {
 
     private surfacePoints: Phaser.Math.Vector2[] = []
 
+    private carSpeed: number = 0
+    private maxCarSpeed: number = 0.6
+    private minCarSpeed: number = -0.6
+
     private width!: number
     private height!: number
 
@@ -86,7 +90,7 @@ export class Game extends Phaser.Scene {
 
                 if (bodyA.gameObject === this.characterHead && (bodyB.gameObject != this.car && bodyB.gameObject != this.characterBody)) {
                     this.characterDead = true
-                    console.log("player dead")
+                    // console.log("player dead")
                 }
             })
         })
@@ -95,8 +99,11 @@ export class Game extends Phaser.Scene {
         this.wheel1 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: this.shapes.carWheel })
         this.wheel2 = this.matter.add.sprite(this.startPosX, this.startPosY, 'wheel', undefined, { shape: this.shapes.carWheel })
 
-        this.characterHead.setDisplaySize(50 * 1.079646, 50)
-        this.characterBody.setDisplaySize(40 * 1.71428, 40)
+        // this.characterHead.setDisplaySize(50 * 1.079646, 50)
+        // this.characterBody.setDisplaySize(40 * 1.71428, 40)
+
+        this.characterHead.setMass(1)
+        this.characterBody.setMass(1)
 
         const characterBodyShape = this.characterBody.body as MatterJS.BodyType
         const characterHeadShape = this.characterHead.body as MatterJS.BodyType
@@ -109,7 +116,7 @@ export class Game extends Phaser.Scene {
         // neckJoint.stiffness = 1; // Жесткость сустава (от 0 до 1, где 1 - максимальная жесткость)
         // neckJoint.length = 0;
 
-        const carWidth = 250
+        const carWidth = 175
         this.car.setDisplaySize(carWidth, 1)
 
         function updateCarHeight(car: Phaser.Physics.Matter.Sprite) {
@@ -120,19 +127,32 @@ export class Game extends Phaser.Scene {
             wheel.setDisplaySize(car.displayWidth * 0.22, car.displayWidth * 0.22)
         }
 
+        function updateCharacterSizes(car: Phaser.Physics.Matter.Sprite, characterBody: Phaser.Physics.Matter.Sprite, characterHead: Phaser.Physics.Matter.Sprite) {
+            characterBody.setDisplaySize((car.displayWidth * 0.18) * 1.71, (car.displayWidth * 0.18))
+            characterHead.setDisplaySize((car.displayWidth * 0.25) * 1.07, (car.displayWidth * 0.25))
+        }
+
         updateCarHeight(this.car)
         updateWheelSizes(this.car, this.wheel1)
         updateWheelSizes(this.car, this.wheel2)
+        updateCharacterSizes(this.car, this.characterBody, this.characterHead)
 
-        const wheelBounce = 0.1
+        const wheelBounce = 0
         const carBounce = 0
-        const wheelFriction = 0.5
+        const wheelFriction = 0.7
+        const wheelMass = 100
+        const carMass = 100
 
         this.wheel1.setBounce(wheelBounce)
         this.wheel2.setBounce(wheelBounce)
         this.car.setBounce(carBounce)
+
         this.wheel1.setFriction(wheelFriction)
         this.wheel2.setFriction(wheelFriction)
+
+        this.wheel1.setMass(wheelMass)
+        this.wheel2.setMass(wheelMass)
+        this.car.setMass(carMass)
 
         const carBody = this.car.body as MatterJS.BodyType
         const wheel1Body = this.wheel1.body as MatterJS.BodyType
@@ -184,8 +204,8 @@ export class Game extends Phaser.Scene {
             0,
             {
                 pointA: {
-                    x: -15,
-                    y: -60
+                    x: -12,
+                    y: -50
                 }
             }
         )
@@ -218,19 +238,23 @@ export class Game extends Phaser.Scene {
     }
 
     update(t: number, dt: number) {
-        const speed = 0.4
+        const speed = this.carSpeed
+        const speedStep = 0.02
 
         if (this.cursors.left?.isDown) {
-
-            this.wheel1.setAngularVelocity(-speed)
-            this.wheel2.setAngularVelocity(-speed)
+            if (this.carSpeed > this.minCarSpeed) {
+                this.carSpeed -= speedStep
+            }
+            this.wheel1.setAngularVelocity(this.carSpeed)
+            this.wheel2.setAngularVelocity(this.carSpeed)
         } else if (this.cursors.right?.isDown) {
-            this.wheel1.setAngularVelocity(speed)
-            this.wheel2.setAngularVelocity(speed)
-        }  else if (this.esc?.isDown) {
-            this.scene.start('main-menu')
-        } else if (this.cursors.space?.isDown) {
-            this.wheel1.setAngularVelocity(0)
+            if (this.carSpeed < this.maxCarSpeed) {
+                this.carSpeed += speedStep
+            }
+            this.wheel1.setAngularVelocity(this.carSpeed)
+            this.wheel2.setAngularVelocity(this.carSpeed)
+        }  else {
+            
         }
 
         this.updateDistance()
@@ -248,6 +272,7 @@ export class Game extends Phaser.Scene {
 
         if (this.fuel < 0) {
             this.fuel = 0
+            // console.log("no fuel")
         }
 
         this.characterHead.setRotation(Math.PI / 2 + this.car.rotation - Math.PI / 12)
@@ -362,10 +387,11 @@ export class Game extends Phaser.Scene {
     generateSurface() {
         if (this.generatedDistance < this.car.x + this.width) {
             const xStart: number = this.generatedDistance
-            const xStep: number = 200
+            // console.log(xStart)
+            const xStep: number = 300
             const pointNumber: number = 10
-            const yMin = -30
-            const yMax = 100
+            const yMin = - 10 - 10 * (this.generatedDistance / 5000)
+            const yMax = 50 + 100 * (this.generatedDistance / 5000)
             const splineStep = 10
 
             this.lastGenerationEndX = xStart
@@ -387,7 +413,7 @@ export class Game extends Phaser.Scene {
         const yOffset = 100
 
         const coinsCount: number = 3
-        const fuel: boolean = true
+        const fuel: boolean = false
 
         const minDistance: number = 50
 
@@ -426,11 +452,9 @@ export class Game extends Phaser.Scene {
     }
 
     addLine(startPoint: Phaser.Math.Vector2, endPoint: Phaser.Math.Vector2) {
-        // Вычисляем центр массы линии
         const massCenterX = startPoint.x;
         const massCenterY = startPoint.y;
 
-        // Создаем хитбокс отрезка с помощью Matter.js
         const lineVertices = [
             { x: startPoint.x - massCenterX, y: startPoint.y - massCenterY },
             { x: endPoint.x - massCenterX, y: endPoint.y - massCenterY },
@@ -439,13 +463,10 @@ export class Game extends Phaser.Scene {
 
         const lineBody = this.matter.add.fromVertices(massCenterX, massCenterY, lineVertices, { isStatic: true });
 
-        // Создание графического объекта
         const graphics = this.add.graphics();
 
-        // Настройка стиля линии
         graphics.lineStyle(2, 0xffffff);
 
-        // Рисование линии между двумя точками
         graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
 

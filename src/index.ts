@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import {PreloadScene} from "./scenes/PreloadScene";
-import {Game} from "./scenes/Game"
+import { PreloadScene } from "./scenes/PreloadScene";
+import { Game } from "./scenes/Game"
 import MainMenuScene from "./scenes/Main-menu";
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -10,12 +10,12 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: 'matter',
     matter: {
-      debug: false,
+      debug: true,
       gravity: { y: 3 },
       setBounds: {
         left: false,
         right: false,
-        top:  false,
+        top: false,
         bottom: false
       }
     }
