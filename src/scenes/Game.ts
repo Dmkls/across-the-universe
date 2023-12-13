@@ -2,6 +2,10 @@ import Phaser, { NONE } from "phaser"
 import { Collision, Composite, Composites } from "matter"
 import Spline from 'typescript-cubic-spline'
 
+function randomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 export class Game extends Phaser.Scene {
 
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
@@ -26,7 +30,7 @@ export class Game extends Phaser.Scene {
     private fuelDecreaseRate: number = this.maxFuel / 30
 
     private fuel: number = this.maxFuel
-    private distance: number = 0
+    private distance: number = 0 // m
     private moneyCounter: number = 0
 
     private startPosX!: number
@@ -41,6 +45,8 @@ export class Game extends Phaser.Scene {
     private backWall!: Phaser.GameObjects.Sprite
 
     private generatedDistance: number = 0 // px
+
+    private lastGenerationEndX: number = 0
 
     private esc!: any
 
@@ -99,29 +105,9 @@ export class Game extends Phaser.Scene {
 
         // const neckJoint = this.matter.add.joint(characterBodyShape, characterHeadShape, 100, 1);
 
-        // Установка ограничений соединения 
+        // Установка ограничений соединения
         // neckJoint.stiffness = 1; // Жесткость сустава (от 0 до 1, где 1 - максимальная жесткость)
         // neckJoint.length = 0;
-
-        // this.surfacePoints = this.generateSurfacePoints(0, 200, 10, -30, 200, 10)
-        // console.log(this.surfacePoints)
-
-        // for (let i = 0; i < this.surfacePoints.length - 1; i++) {
-        //     this.addLine(this.surfacePoints[i], this.surfacePoints[i + 1])
-        // }
-
-        // this.surfacePoints = this.generateSurfacePoints(1800, 200, 10, -30, 200, 10)
-        // console.log(this.surfacePoints)
-
-        // for (let i = 0; i < this.surfacePoints.length - 1; i++) {
-        //     this.addLine(this.surfacePoints[i], this.surfacePoints[i + 1])
-        // }
-
-        this.addCoin(1000, 600, 500)
-        this.addCoin(1080, 600, 100)
-        this.addCoin(1150, 600, 100)
-
-        this.addFuel(1300, 600)
 
         const carWidth = 250
         this.car.setDisplaySize(carWidth, 1)
@@ -204,11 +190,11 @@ export class Game extends Phaser.Scene {
             }
         )
 
-        // камера 
+        // камера
         this.cameras.main.startFollow(this.car)
         this.cameras.main.setFollowOffset(-175, 100) // Фиксация горизонтального положения, смещение по вертикали
         this.cameras.main.setDeadzone(0, 0) // Зона смягчения, в которой объект может перемещаться без активации камеры
-        this.cameras.main.setLerp(1, 1) // Настройка скорости следования камеры (значения от 0 до 1)
+        this.cameras.main.setLerp(1, 1) // Настройка скорости следования камеры
 
         // коллизиции
         this.wheel1.setCollisionCategory(1)
@@ -264,10 +250,8 @@ export class Game extends Phaser.Scene {
             this.fuel = 0
         }
 
-        if (!this.characterDead) {
-            this.characterHead.setRotation(Math.PI / 2 + this.car.rotation - Math.PI / 12)
-        }
-        
+        this.characterHead.setRotation(Math.PI / 2 + this.car.rotation - Math.PI / 12)
+
         this.characterBody.setRotation(Math.PI / 2 + this.car.rotation)
     }
 
@@ -304,23 +288,64 @@ export class Game extends Phaser.Scene {
         this.backWall.y = newY
     }
 
-    generateSurfacePoints(xStart: number, xStep: number, pointNumber: number, yMin: number, yMax: number, splineStep: number = 5) {
-        function randomInt(min: number, max: number) {
-            return Math.floor(Math.random() * (max - min + 1)) + min
+    // generateSurfacePoints(xStart: number, yStart: number, xStep: number, pointNumber: number, yMin: number, yMax: number, splineStep: number = 5) {
+    //     function randomInt(min: number, max: number) {
+    //         return Math.floor(Math.random() * (max - min + 1)) + min
+    //     }
+
+    //     let xArr: number[] = []
+    //     let yArr: number[] = []
+
+    //     for (let i = 0; i < pointNumber; i++) {
+    //         xArr.push(xStart + xStep * i)
+    //         yArr.push(randomInt(yMin, yMax))
+    //     }
+
+    //     const spline = new Spline(xArr, yArr)
+
+    //     let pointsTmp: number[][] = []
+    //     for (let x = xStart; x <= xStart + xStep * (pointNumber - 1); x += splineStep) {
+    //         pointsTmp.push([x, spline.at(x)])
+    //     }
+
+    //     let points: Phaser.Math.Vector2[] = pointsTmp.flatMap(([x, y]) => new Phaser.Math.Vector2(x, y));
+
+    //     let result: Phaser.Math.Vector2[] = []
+    //     for (let i = 0; i < points.length; i++) {
+    //         result.push(new Phaser.Math.Vector2(points[i].x, this.height - points[i].y))
+    //     }
+
+    //     return result
+    // }
+
+    generateSurfacePoints(xStep: number, pointNumber: number, yMin: number, yMax: number, splineStep: number = 5) {
+        let xArr: number[] = [];
+        let yArr: number[] = [];
+
+        if (this.surfacePoints.length > 0) {
+            const pointsCount = randomInt(1, this.surfacePoints.length >= 5 ? 5 : this.surfacePoints.length)
+            for (let i = 1; i <= pointsCount; i++) {
+                const point = this.surfacePoints[this.surfacePoints.length - i]
+                xArr.push(point.x)
+                yArr.push(this.height - point.y)
+            }
+            this.generatedDistance -= (pointsCount - 1) * splineStep
+        } else {
+            xArr.push(0)
+            yArr.push(0)
         }
 
-        let xArr: number[] = []
-        let yArr: number[] = []
+        const xStart = xArr[xArr.length - 1]
 
-        for (let i = 0; i < pointNumber; i++) {
+        for (let i = 1; i < pointNumber; i++) {
             xArr.push(xStart + xStep * i)
             yArr.push(randomInt(yMin, yMax))
         }
 
-        const spline = new Spline(xArr, yArr)
+        const spline = new Spline(xArr, yArr);
 
         let pointsTmp: number[][] = []
-        for (let x = xStart; x <= xStep * (pointNumber - 1); x += splineStep) {
+        for (let x = xStart; x <= xStart + xStep * (pointNumber - 1); x += splineStep) {
             pointsTmp.push([x, spline.at(x)])
         }
 
@@ -340,22 +365,58 @@ export class Game extends Phaser.Scene {
             const xStep: number = 200
             const pointNumber: number = 10
             const yMin = -30
-            const yMax = 200
+            const yMax = 100
             const splineStep = 10
 
-            this.surfacePoints = this.generateSurfacePoints(xStart, xStep, pointNumber, yMin, yMax, splineStep)
+            this.lastGenerationEndX = xStart
+
+            this.surfacePoints = this.generateSurfacePoints(xStep, pointNumber, yMin, yMax, splineStep)
 
             for (let i = 0; i < this.surfacePoints.length - 1; i++) {
                 this.addLine(this.surfacePoints[i], this.surfacePoints[i + 1])
             }
-            
-            this.generatedDistance = xStart + xStep * (pointNumber - 1)
-            console.log(this.generatedDistance)
+
+            this.generatedDistance += xStep * (pointNumber - 1)
         }
     }
 
     generateItems() {
-        
+        const pointsCount = this.surfacePoints.length
+        const xEnd = this.surfacePoints[pointsCount - 1].x
+
+        const yOffset = 100
+
+        const coinsCount: number = 3
+        const fuel: boolean = true
+
+        const minDistance: number = 50
+
+        function findIndices(surfacePoints: Phaser.Math.Vector2[], n: number): number[] {
+            const indices: number[] = [];
+
+            for (let i = 0; i < n; i++) {
+                indices.push(randomInt(0, surfacePoints.length - 1))
+            }
+
+            return indices
+        }
+
+        const coinsIndices = findIndices(this.surfacePoints, coinsCount)
+        const fuelIndex = findIndices(this.surfacePoints, 1)
+
+        if (this.lastGenerationEndX < xEnd) {
+            for (let i = 0; i < coinsCount; i++) {
+                const point = this.surfacePoints[coinsIndices[i]]
+                this.addCoin(point.x, point.y - yOffset, 500)
+            }
+
+            if (fuel) {
+                const point = this.surfacePoints[fuelIndex[0]]
+                this.addFuel(point.x, point.y - yOffset)
+            }
+
+            this.lastGenerationEndX = xEnd
+        }
     }
 
     generateMap() {
@@ -366,12 +427,8 @@ export class Game extends Phaser.Scene {
 
     addLine(startPoint: Phaser.Math.Vector2, endPoint: Phaser.Math.Vector2) {
         // Вычисляем центр массы линии
-        // Вычисляем центр массы линии
         const massCenterX = startPoint.x;
         const massCenterY = startPoint.y;
-
-        // Создаем отрезок с помощью Phaser.GameObjects.Line
-        // const line = new Phaser.GameObjects.Line(this, startPoint.x, startPoint.y, endPoint.x, endPoint.y, 0xff0000);
 
         // Создаем хитбокс отрезка с помощью Matter.js
         const lineVertices = [
@@ -382,13 +439,14 @@ export class Game extends Phaser.Scene {
 
         const lineBody = this.matter.add.fromVertices(massCenterX, massCenterY, lineVertices, { isStatic: true });
 
-        // Связываем отрезок и хитбокс
-        // line.setData('body', lineBody);
+        // Создание графического объекта
+        const graphics = this.add.graphics();
 
-        // Добавляем отрезок на сцену
-        // this.add.existing(line);
+        // Настройка стиля линии
+        graphics.lineStyle(2, 0xffffff);
 
-        // return line;
+        // Рисование линии между двумя точками
+        graphics.lineBetween(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
 
     addItem(x: number = 0, y: number = 0, type: string, size: number) {
@@ -414,6 +472,7 @@ export class Game extends Phaser.Scene {
         })
 
         newItem.setDisplaySize(size, size)
+        newItem.setMass(0)
 
         this.matter.world.on(Phaser.Physics.Matter.Events.COLLISION_START, (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
             const { pairs } = event

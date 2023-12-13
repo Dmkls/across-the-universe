@@ -23,10 +23,6 @@ export default class StartMenuScene extends Phaser.Scene
     }
 
     preload() {
-        this.load.image('start-background', 'assets/images/start/background.png')
-        this.load.image('button', 'assets/images/start/gray.png')
-        this.load.image('cursor-hand', 'assets/images/car/wheel.png')
-        this.load.image('logout', 'assets/images/menu/logout.png')
     }
 
     create() {
@@ -38,14 +34,14 @@ export default class StartMenuScene extends Phaser.Scene
         // Play button
         this.loginButton = this.add.image(width-150, height/2, 'button')
             .setDisplaySize(150, 60)
-        this.add.text(this.loginButton.x, this.loginButton.y, 'ВХОД')
+        this.add.text(this.loginButton.x, this.loginButton.y, 'ВХОД', { fontFamily: "Arial", fontSize: 18, color: "#ffffff" })
             .setOrigin(0.5)
 
         // Registration button
         this.registerButton = this.add.image(this.loginButton.x, this.loginButton.y+this.loginButton.displayHeight+10, 'button')
             .setDisplaySize(150, 60)
 
-        this.add.text(this.registerButton.x, this.registerButton.y, 'РЕГИСТРАЦИЯ')
+        this.add.text(this.registerButton.x, this.registerButton.y, 'РЕГИСТРАЦИЯ', { fontFamily: "Arial", fontSize: 18, color: "#ffffff" })
             .setOrigin(0.5)
 
         // Logout-icon
@@ -62,15 +58,16 @@ export default class StartMenuScene extends Phaser.Scene
 
         this.loginButton.on('selected', () => {
             this.buttons = []
-            this.scene.start('main-menu')
+            this.scene.start('login-page')
         })
 
         this.registerButton.on('selected', () => {
-            console.log('registration')
+            this.buttons = []
+            this.scene.start('registration-page')
         })
 
         this.loginButton.on('selected', () => {
-            console.log('logout')
+            console.log('login')
         })
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {

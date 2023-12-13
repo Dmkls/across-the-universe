@@ -31,22 +31,6 @@ export default class MainMenuScene extends Phaser.Scene
     }
 
     preload() {
-        this.load.image('ground', 'assets/images/ground.png')
-        this.load.image('gray', 'assets/images/menu/gray.png')
-        this.load.image('cursor-hand', 'assets/images/fuel.png')
-        this.load.image('car-full', 'assets/images/menu/car.png')
-        this.load.image('background', 'assets/images/menu/bg.jpg')
-        this.load.image('none', 'assets/images/menu/1x1.png')
-        this.load.image('top-bar-background', 'assets/images/menu/top-bar.png')
-        this.load.image('play', 'assets/images/menu/play.png')
-
-        this.load.image('engine', 'assets/images/menu/engine-icon.png')
-        this.load.image('wheel-i', 'assets/images/menu/wheel-icon.png')
-        this.load.image('suspension', 'assets/images/menu/suspension-icon.png')
-
-        this.load.spritesheet('progress-bar', 'assets/images/menu/progress-bar.png', { frameWidth: 256, frameHeight: 256 })
-
-        this.load.image('logout', 'assets/images/menu/logout.png')
 
         // this.load.audio('within-you', 'assets/sounds/Within-You-Without-You.m4a')
 

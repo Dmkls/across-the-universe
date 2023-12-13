@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import * as events from "events"
 
-export default class RegistrationScene extends Phaser.Scene
+export default class LoginScene extends Phaser.Scene
 {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
 
@@ -14,16 +14,16 @@ export default class RegistrationScene extends Phaser.Scene
 
     private loginInput!: Phaser.GameObjects.Image
     private passwordInput!: Phaser.GameObjects.Image
-    private passwordInputConfirmation!: Phaser.GameObjects.Image
-    private registrationButton!: Phaser.GameObjects.Image
     private logoutButton!: Phaser.GameObjects.Image
+    private loginButton!: Phaser.GameObjects.Image
 
     private login!: Phaser.GameObjects.Text
     private password!: Phaser.GameObjects.Text
-    private passwordConfirmation!: Phaser.GameObjects.Text
+
+
 
     constructor() {
-        super('registration-page')
+        super('login-page')
     }
 
     init() {
@@ -40,7 +40,7 @@ export default class RegistrationScene extends Phaser.Scene
 
         // Inputs
         // Login
-        this.loginInput = this.add.image(width/2, height/3, 'input')
+        this.loginInput = this.add.image(width/2, height/2.5, 'input')
             .setDisplaySize(250, 50)
 
         this.login = this.add.text(this.loginInput.x, this.loginInput.y, '', {fontFamily: "Arial", fontSize: 18, color: "#000000" })
@@ -53,19 +53,13 @@ export default class RegistrationScene extends Phaser.Scene
         this.password = this.add.text(this.passwordInput.x, this.passwordInput.y, '', {fontFamily: "Arial", fontSize: 18, color: "#000000" })
             .setOrigin(0.5)
 
-        this.passwordInputConfirmation = this.add.image(width/2, this.passwordInput.y + this.passwordInput.displayHeight + 10, 'input')
-            .setDisplaySize(250, 50)
-
-        this.passwordConfirmation = this.add.text(this.passwordInputConfirmation.x, this.passwordInputConfirmation.y, '', {fontFamily: "Arial", fontSize: 18, color: "#000000" })
-            .setOrigin(0.5)
-
         // Buttons
         // Registration button
-        this.registrationButton = this.add.image(this.passwordInputConfirmation.x,
-            this.passwordInputConfirmation.y + this.passwordInputConfirmation.displayHeight + 10, 'button')
+        this.loginButton = this.add.image(this.passwordInput.x,
+            this.passwordInput.y + this.passwordInput.displayHeight + 10, 'button')
             .setDisplaySize(250, 50)
 
-        this.add.text(this.registrationButton.x, this.registrationButton.y, 'зарегистрироваться'.toUpperCase(), { fontFamily: "Arial", fontSize: 18, color: "#ffffff" })
+        this.add.text(this.loginButton.x, this.loginButton.y, 'вход'.toUpperCase(), { fontFamily: "Arial", fontSize: 18, color: "#ffffff" })
             .setOrigin(0.5)
 
         // Logout-icon
@@ -76,21 +70,17 @@ export default class RegistrationScene extends Phaser.Scene
         this.buttons.push(this.logoutButton)
         this.buttons.push(this.loginInput)
         this.buttons.push(this.passwordInput)
-        this.buttons.push(this.passwordInputConfirmation)
-        this.buttons.push(this.registrationButton)
+        this.buttons.push(this.loginButton)
 
         this.inputs.push(this.login)
         this.inputs.push(this.password)
-        this.inputs.push(this.passwordConfirmation)
 
 
         this.loginInput.on('selected', () => {
             window.addEventListener("keydown", this.readInput)
         })
+
         this.passwordInput.on('selected', () => {
-            window.addEventListener("keydown", this.readInput)
-        })
-        this.passwordInputConfirmation.on('selected', () => {
             window.addEventListener("keydown", this.readInput)
         })
 
@@ -101,27 +91,26 @@ export default class RegistrationScene extends Phaser.Scene
             this.scene.start('start-page')
         })
 
-        this.registrationButton.on('selected', () => {
+        this.loginButton.on('selected', () => {
             this.buttons = []
             this.inputs = []
             window.removeEventListener("keydown", this.readInput)
-            console.log(this.login.text, this.password.text, this.passwordConfirmation.text)
+            console.log(this.login.text, this.password.text)
             this.scene.start('main-menu')
         })
-        //
-        // this.loginInput.off('selected', () => {
-        //     window.removeEventListener("keydown", this.readInput)
-        // })
-        //
-        // this.passwordInput.off('selected', () => {
-        //     window.removeEventListener("keydown", this.readInput)
-        // })
+
+        this.loginInput.off('selected', () => {
+            window.removeEventListener("keydown", this.readInput)
+        })
+
+        this.passwordInput.off('selected', () => {
+            window.removeEventListener("keydown", this.readInput)
+        })
 
         this.loginInput.setInteractive()
         this.passwordInput.setInteractive()
-        this.passwordInputConfirmation.setInteractive()
         this.logoutButton.setInteractive()
-        this.registrationButton.setInteractive()
+        this.loginButton.setInteractive()
 
         // pointerover
         this.loginInput.on("pointerover", () => {
@@ -130,11 +119,8 @@ export default class RegistrationScene extends Phaser.Scene
         this.passwordInput.on("pointerover", () => {
             this.selectButton(2)
         })
-        this.passwordInputConfirmation.on("pointerover", () => {
+        this.loginButton.on("pointerover", () => {
             this.selectButton(3)
-        })
-        this.registrationButton.on("pointerover", () => {
-            this.selectButton(4)
         })
         this.logoutButton.on("pointerover", () => {
             this.selectButton(0)
@@ -147,13 +133,10 @@ export default class RegistrationScene extends Phaser.Scene
         this.passwordInput.on("pointerdown", () => {
             this.confirmSelection()
         })
-        this.passwordInputConfirmation.on("pointerdown", () => {
-            this.confirmSelection()
-        })
         this.logoutButton.on("pointerdown", () => {
             this.confirmSelection()
         })
-        this.registrationButton.on("pointerdown", () => {
+        this.loginButton.on("pointerdown", () => {
             this.confirmSelection()
         })
     }
@@ -187,6 +170,7 @@ export default class RegistrationScene extends Phaser.Scene
         }
 
         this.selectedButtonIndex = index
+
     }
 
     selectNextButton(change = 1) {
