@@ -41,9 +41,22 @@ export class PreloadScene extends Phaser.Scene {
     // Registration
     this.load.image('back', 'assets/images/start/back.png')
     this.load.image('input', 'assets/images/start/input-text.png')
+
+    // Leader Board
+    this.load.image('l-b-background', 'assets/images/leaders/background.png')
+    this.load.image('leader1', 'assets/images/leaders/person_holder.png')
+    this.load.image('leader2', 'assets/images/leaders/person_holder_d.png')
+    this.load.image('1', 'assets/images/leaders/1.png')
+    this.load.image('2', 'assets/images/leaders/2.png')
+    this.load.image('3', 'assets/images/leaders/3.png')
+    this.load.image('level-1', 'assets/images/leaders/level_1.png')
+
+
+
+
   }
 
   create() {
-    this.scene.start('start-page')
+    this.scene.start('leaderboard-scene')
   }
 }

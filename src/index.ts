@@ -5,6 +5,7 @@ import MainMenuScene from "./scenes/Main-menu";
 import StartMenuScene from "./scenes/start";
 import RegistrationScene from "./scenes/registration";
 import LoginScene from "./scenes/login";
+import Leaderboard from "./scenes/Leaderboard";
 
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -27,7 +28,7 @@ const config: Phaser.Types.Core.GameConfig = {
   dom: {
     createContainer: true
   },
-  scene: [PreloadScene, Game, MainMenuScene, StartMenuScene, RegistrationScene, LoginScene]
+  scene: [PreloadScene, Game, MainMenuScene, StartMenuScene, RegistrationScene, LoginScene, Leaderboard]
 }
 
 new Phaser.Game(config)
