@@ -224,9 +224,11 @@ export class Game extends Phaser.Scene {
 
             this.wheel1.setAngularVelocity(-speed)
             this.wheel2.setAngularVelocity(-speed)
+            this.car.setAngularVelocity(-speed/10)
         } else if (this.cursors.right?.isDown) {
             this.wheel1.setAngularVelocity(speed)
             this.wheel2.setAngularVelocity(speed)
+            this.car.setAngularVelocity(speed/10)
         }  else if (this.esc?.isDown) {
             this.scene.start('main-menu')
         } else if (this.cursors.space?.isDown) {

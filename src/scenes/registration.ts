@@ -22,6 +22,8 @@ export default class RegistrationScene extends Phaser.Scene
     private password!: Phaser.GameObjects.Text
     private passwordConfirmation!: Phaser.GameObjects.Text
 
+    private esc!: any
+
     constructor() {
         super('registration-page')
     }
@@ -30,10 +32,9 @@ export default class RegistrationScene extends Phaser.Scene
         this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
     }
 
-    preload() {
-    }
-
     create() {
+        this.esc = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+
         const { width, height } = this.scale
 
         this.add.image(0, 0, 'start-background').setOrigin(0, 0).setScale(1.2)
@@ -108,14 +109,7 @@ export default class RegistrationScene extends Phaser.Scene
             console.log(this.login.text, this.password.text, this.passwordConfirmation.text)
             this.scene.start('main-menu')
         })
-        //
-        // this.loginInput.off('selected', () => {
-        //     window.removeEventListener("keydown", this.readInput)
-        // })
-        //
-        // this.passwordInput.off('selected', () => {
-        //     window.removeEventListener("keydown", this.readInput)
-        // })
+
 
         this.loginInput.setInteractive()
         this.passwordInput.setInteractive()
@@ -212,6 +206,11 @@ export default class RegistrationScene extends Phaser.Scene
     }
 
     update() {
-
+        if (this.esc?.isDown) {
+            this.buttons = []
+            this.inputs = []
+            window.removeEventListener("keydown", this.readInput)
+            this.scene.start('start-page')
+        }
     }
 }

@@ -20,7 +20,7 @@ export default class LoginScene extends Phaser.Scene
     private login!: Phaser.GameObjects.Text
     private password!: Phaser.GameObjects.Text
 
-
+    private esc!: any
 
     constructor() {
         super('login-page')
@@ -30,10 +30,9 @@ export default class LoginScene extends Phaser.Scene
         this.cursors = this.input.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys
     }
 
-    preload() {
-    }
-
     create() {
+        this.esc = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+
         const { width, height } = this.scale
 
         this.add.image(0, 0, 'start-background').setOrigin(0, 0).setScale(1.2)
@@ -196,6 +195,11 @@ export default class LoginScene extends Phaser.Scene
     }
 
     update() {
-
+        if (this.esc?.isDown) {
+            this.buttons = []
+            this.inputs = []
+            window.removeEventListener("keydown", this.readInput)
+            this.scene.start('start-page')
+        }
     }
 }

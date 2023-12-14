@@ -123,7 +123,8 @@ export default class MainMenuScene extends Phaser.Scene
         })
 
         this.leaderButton.on('selected', () => {
-            console.log('credits')
+            this.buttons = []
+            this.scene.start('leaderboard-scene')
         })
 
         this.logoutButton.on('selected', () => {
